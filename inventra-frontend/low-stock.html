@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Low Stock | Inventra</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <h2>Inventory System</h2>
+    <span id="userRole">ADMIN</span>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="container">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="products.html">📦 Products</a>
+    <a href="low-stock.html">⚠ Low Stock</a>
+
+    <!-- ADMIN ONLY -->
+    <a href="add-product.html" class="admin-only">➕ Add Product</a>
+    <a href="categories.html" class="admin-only">📁 Categories</a>
+
+    <a href="login.html" class="logout">➜ Logout</a>
+</div>
+
+
+    <!-- CONTENT -->
+    <div class="content">
+        <h2>⚠ Low Stock Products</h2>
+
+        <table class="product-table">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Name</th>
+                    <th>Quantity</th>
+                    <th>Reorder Level</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="lowStockBody">
+                <!-- Low stock products load here -->
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script src="js/auth.js"></script>
+<script>
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    document.getElementById("userRole").innerText = role;
+
+    fetch("http://localhost:8080/products/low-stock", {
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        const tbody = document.getElementById("lowStockBody");
+
+        if (data.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align:center; color:green;">
+                        ✅ No low stock items
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        data.forEach(p => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${p.sku}</td>
+                <td>${p.name}</td>
+                <td>${p.quantity}</td>
+                <td>${p.reorderLevel}</td>
+                <td><span class="low-stock">LOW</span></td>
+            `;
+            tbody.appendChild(row);
+        });
+    });
+     if (role !== "ADMIN") {
+    document.querySelectorAll(".admin-only")
+      .forEach(el => el.style.display = "none");
+  }
+</script>
+
+</body>
+</html>

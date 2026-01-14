@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Products | Inventra</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <h2>Inventory System</h2>
+    <span id="userRole">ADMIN</span>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="container">
+
+    <!-- SIDEBAR -->
+   <div class="sidebar">
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="products.html">📦 Products</a>
+    <a href="low-stock.html">⚠ Low Stock</a>
+
+    <!-- ADMIN ONLY -->
+    <a href="add-product.html" class="admin-only">➕ Add Product</a>
+    <a href="categories.html" class="admin-only">📁 Categories</a>
+
+    <a href="login.html" class="logout">➜ Logout</a>
+</div>
+
+    <!-- CONTENT -->
+    <div class="content">
+        <h2>Product List</h2>
+        <select id="filterCategory" onchange="loadProducts()">
+    <option value="">All Categories</option>
+</select>
+
+        <table class="product-table">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Name</th>
+                    <th>Quantity</th>
+                    <th>Reorder Level</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th class="admin-only">Action</th>
+                </tr>
+            </thead>
+            <tbody id="productTableBody">
+                <!-- Products will load here -->
+            </tbody>
+        </table>
+        <p id="emptyMsg" class="empty-msg" style="display:none;">
+  No products found
+</p>
+    </div>
+
+</div>
+
+<script src="js/auth.js"></script>
+<script>
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    document.getElementById("userRole").innerText = role;
+
+   fetch("http://localhost:8080/products/all", {
+  headers: {
+    "Authorization": "Bearer " + token
+  }
+})
+.then(res => res.json())
+.then(data => {
+
+  const tbody = document.getElementById("productTableBody");
+  const emptyMsg = document.getElementById("emptyMsg");
+
+  tbody.innerHTML = ""; // important reset
+
+  if (data.length === 0) {
+    emptyMsg.style.display = "block";
+    return;
+  }
+
+  emptyMsg.style.display = "none";
+
+  data.forEach(p => {
+    const row = document.createElement("tr");
+
+    const status =
+      p.quantity <= p.reorderLevel
+        ? `<span class="low-stock">LOW</span>`
+        : `<span class="in-stock">OK</span>`;
+
+const actionCell = role === "ADMIN"
+  ? `<td class="admin-only">
+      <button class="small-btn" onclick='openModal(${JSON.stringify(p)})'>Edit</button>
+<button class="small-btn danger" onclick="deleteProduct('${p.sku}')">Delete</button>
+
+       </td>`
+  : ``;
+
+    row.innerHTML = `
+      <td>${p.sku}</td>
+      <td>${p.name}</td>
+      <td>${p.quantity}</td>
+      <td>${p.reorderLevel}</td>
+      <td>₹${p.unitPrice}</td>
+      <td>${status}</td>
+      ${actionCell}
+    `;
+
+    tbody.appendChild(row);
+  });
+
+});
+ if (role !== "ADMIN") {
+       document.querySelectorAll(".admin-only")
+         .forEach(el => el.style.display = "none");
+    }
+      </script>
+<!-- EDIT PRODUCT MODAL -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <h3>Edit Product</h3>
+
+    <input type="text" id="editSku" placeholder="SKU" disabled>
+    <input type="text" id="editName" placeholder="Product Name">
+    <input type="number" id="editQuantity" placeholder="Quantity">
+    <input type="number" id="editReorderLevel" placeholder="Reorder Level">
+    <input type="number" id="editUnitPrice" placeholder="Unit Price">
+    <input type="text" id="editDescription" placeholder="Description">
+
+    <div class="modal-actions">
+      <button onclick="updateProduct()" class="save-btn">Save</button>
+      <button onclick="closeModal()" class="cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+<script>
+let selectedProduct = null;
+
+function openModal(p) {
+  selectedProduct = p;
+  document.getElementById("editSku").value = p.sku;
+  document.getElementById("editName").value = p.name;
+  document.getElementById("editQuantity").value = p.quantity;
+  document.getElementById("editReorderLevel").value = p.reorderLevel;
+  document.getElementById("editUnitPrice").value = p.unitPrice;
+  document.getElementById("editDescription").value = p.description;
+
+  document.getElementById("editModal").style.display = "block";
+}
+
+function closeModal() {
+  document.getElementById("editModal").style.display = "none";
+}
+
+function updateProduct() {
+  const updated = {
+    sku: selectedProduct.sku,
+    name: document.getElementById("editName").value,
+    quantity: document.getElementById("editQuantity").value,
+    reorderLevel: document.getElementById("editReorderLevel").value,
+    unitPrice: document.getElementById("editUnitPrice").value,
+    description: document.getElementById("editDescription").value
+  };
+
+  fetch("http://localhost:8080/products/update", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify(updated)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error();
+    alert("Product updated!");
+    closeModal();
+    location.reload();
+  })
+  .catch(() => alert("Failed to update product"));
+}
+function deleteProduct(sku) {
+  if (!confirm("Are you sure you want to delete this product?")) return;
+
+  fetch(`http://localhost:8080/products/delete/${sku}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": "Bearer " + localStorage.getItem("token")
+    }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("Delete failed");
+    return res.text();
+  })
+  .then(msg => {
+    alert(msg);
+    location.reload();
+  })
+  .catch(err => alert("Error deleting product!"));
+}
+
+function loadCategoriesForFilter() {
+    fetch("http://localhost:8080/categories/all", {
+        headers: { "Authorization": "Bearer " + token }
+    })
+    .then(res => res.json())
+    .then(data => {
+        const filter = document.getElementById("filterCategory");
+        data.forEach(cat => {
+            const opt = document.createElement("option");
+            opt.value = cat.id;
+            opt.textContent = cat.name;
+            filter.appendChild(opt);
+        });
+    });
+}
+
+loadCategoriesForFilter();
+
+function loadProducts() {
+    const catId = document.getElementById("filterCategory").value;
+    let url = "http://localhost:8080/products/all";
+
+    if (catId) {
+        url = `http://localhost:8080/products/by-category/${catId}`;
+    }
+
+    fetch(url, {
+        headers: { "Authorization": "Bearer " + token }
+    })
+    .then(res => res.json())
+    .then(showProductsTable);
+}
+
+</script>
+<!-- EDIT PRODUCT MODAL -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <h3>Edit Product</h3>
+
+    <input type="text" id="editSku" placeholder="SKU" readonly />
+    <input type="text" id="editName" placeholder="Product Name" />
+    <input type="number" id="editQty" placeholder="Quantity" />
+    <input type="number" id="editReorder" placeholder="Reorder Level" />
+    <input type="number" id="editPrice" placeholder="Unit Price" />
+    <input type="text" id="editDesc" placeholder="Description" />
+
+    <div class="modal-actions">
+      <button onclick="saveProductEdit()" class="btn-save">Save</button>
+      <button onclick="closeModal()" class="btn-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

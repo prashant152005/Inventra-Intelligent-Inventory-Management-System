@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Product | Inventra</title>
+    <link rel="stylesheet" href="css/add-product.css">
+</head>
+
+<body class="light">
+
+<div class="topbar">
+    <h2>Inventory System</h2>
+    <span id="userRole"></span>
+</div>
+
+<div class="container">
+
+    <div class="sidebar">
+        <a href="dashboard.html">📊 Dashboard</a>
+        <a href="products.html">📦 Products</a>
+        <a href="low-stock.html">⚠ Low Stock</a>
+        <a href="add-product.html" class="admin-only">➕ Add Product</a>
+        <a href="categories.html" class="admin-only">📁 Categories</a>
+        <a href="login.html" class="logout">➜ Logout</a>
+    </div>
+
+    <div class="content">
+        <h2>Add New Product</h2>
+
+        <div class="card">
+
+            <form id="addProductForm">
+                <div class="form-grid">
+                    <input type="text" placeholder="SKU" id="sku" required />
+                    <input type="text" placeholder="Product Name" id="name" required />
+                    <input type="number" placeholder="Quantity" id="quantity" required />
+                    <input type="number" placeholder="Reorder Level" id="reorderLevel" required />
+                    <input type="number" placeholder="Unit Price" id="unitPrice" required />
+                    <input type="text" placeholder="Description" id="description" />
+                </div>
+
+                <button type="button" onclick="addProduct()" class="primary-btn">
+                    Add Product
+                </button>
+
+                <p id="msg" style="margin-top:12px;font-weight:600;"></p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="js/auth.js"></script>
+<script src="js/add-product.js"></script>
+</body>
+</html>

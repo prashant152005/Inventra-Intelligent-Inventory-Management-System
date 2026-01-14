@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventra Dashboard</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<div class="topbar">
+    <div>INVENTORY SYSTEM</div>
+    <div>ADMIN</div>
+</div>
+
+<div class="container">
+
+    <div class="sidebar">
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="products.html">📦 Products</a>
+    <a href="low-stock.html">⚠ Low Stock</a>
+
+    <!-- ADMIN ONLY -->
+    <a href="add-product.html" class="admin-only">➕ Add Product</a>
+    <a href="categories.html" class="admin-only">📁 Categories</a>
+
+    <a href="login.html" class="logout">➜ Logout</a>
+    </div>
+
+
+    <div class="main">
+        <div class="page-title">Dashboard</div>
+
+        <div class="cards">
+            <div class="card blue">
+                <span class="icon">📦</span>
+                <p>Total Products</p>
+                <h2 id="totalProducts">0</h2>
+            </div>
+
+            <div class="card red clickable" onclick="goLowStock()">
+                <span class="icon">⚠️</span>
+                <p>Low Stock Items</p>
+                <h2 id="lowstock">0</h2>
+            </div>
+
+            <div class="card green clickable" onclick="gocategories()">
+                <span class="icon">🗂️</span>
+                <p>Categories</p>
+                <h2 id="categoriesCount">0</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="js/dashboard.js"></script>
+<script>
+  const role = localStorage.getItem("role");
+  if (role !== "ADMIN") {
+    document.querySelectorAll(".admin-only")
+      .forEach(el => el.classList.add("hide-column"));
+  }
+</script>
+
+</body>
+</html>
