@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventra | Register</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <script>
+    const role = localStorage.getItem("role");
+
+    if (role !== "ADMIN") {
+        alert("Only Admin can access registration");
+        window.location.href = "login.html";
+    }
+</script>
+
+    <h2>User Registration</h2>
+
+
+    <input type="text" id="username" placeholder="Username" />
+    <input type="email" id="email" placeholder="Email" />
+    <input type="text" id="contactNumber" placeholder="Contact Number" />
+    <input type="password" id="password" placeholder="Password" />
+    <input type="password" id="confirmPassword" placeholder="Confirm Password" />
+
+<!-- 
+    <select id="role">
+        <option value="ADMIN">ADMIN</option>
+        <option value="EMPLOYEE">EMPLOYEE</option>
+    </select> -->
+
+    <button onclick="registerUser()">Register</button>
+
+    <p id="error" class="error"></p>
+</div>
+
+<script src="js/auth.js"></script>
+</body>
+</html>
