@@ -5,27 +5,55 @@ public class ProductRequest {
     private String sku;
     private String name;
     private String description;
+    private Double unitPrice;
     private Integer quantity;
     private Integer reorderLevel;
-    private Double unitPrice;
 
-    // Getters & Setters
+    public String getSku() {
+        return sku;
+    }
 
-    public String getSku() { return sku; }
-    public void setSku(String sku) { this.sku = sku; }
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getName() {
+        return name;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public Integer getQuantity() { return quantity; }
-    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+    public String getDescription() {
+        return description;
+    }
 
-    public Integer getReorderLevel() { return reorderLevel; }
-    public void setReorderLevel(Integer reorderLevel) { this.reorderLevel = reorderLevel; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public Double getUnitPrice() { return unitPrice; }
-    public void setUnitPrice(Double unitPrice) { this.unitPrice = unitPrice; }
+    public Double getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(Double unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public Integer getReorderLevel() {
+        return reorderLevel;
+    }
+
+    public void setReorderLevel(Integer reorderLevel) {
+        this.reorderLevel = reorderLevel;
+    }
 }

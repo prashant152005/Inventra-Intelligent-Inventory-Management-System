@@ -30,17 +30,25 @@ public class JwtUtil {
                 .compact();
     }
 
-
     public String extractEmail(String token) {
         return getClaims(token).getSubject();
     }
+
     public String extractRole(String token) {
         return getClaims(token).get("role", String.class);
     }
 
+    public Date extractExpiration(String token) {
+        return getClaims(token).getExpiration();
+    }
+
+    public boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
 
     private Claims getClaims(String token) {
         byte[] keyBytes = Base64.getDecoder().decode(SECRET);
+
         return Jwts.parserBuilder()
                 .setSigningKey(Keys.hmacShaKeyFor(keyBytes))
                 .build()

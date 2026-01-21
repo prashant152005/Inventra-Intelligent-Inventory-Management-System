@@ -1,98 +1,204 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Low Stock | Inventra</title>
-    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --danger-light: #fef2f2;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-hover: 0 16px 40px rgba(0,0,0,0.13);
+            --radius-lg: 16px;
+        }
+        body {
+            background: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            font-family: system-ui, sans-serif;
+        }
+        .topbar {
+            height: 70px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .container { display: flex; min-height: calc(100vh - 70px); }
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 0;
+        }
+        .sidebar a {
+            display: block;
+            padding: 1rem 1.8rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.25s;
+        }
+        .sidebar a:hover { background: rgba(245,158,11,0.08); }
+        .sidebar a.active { background: var(--warning); color: white; }
+        .main-content { flex: 1; padding: 2.5rem 3rem; }
+        h2 { font-size: 2rem; margin-bottom: 2rem; font-weight: 700; }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+        .low-stock-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 1.8rem;
+            box-shadow: var(--shadow-sm);
+            border-left: 6px solid var(--warning);
+            transition: all 0.3s ease;
+        }
+        .low-stock-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
+        }
+        .low-stock-card.critical {
+            border-left-color: var(--danger);
+            background: var(--danger-light);
+        }
+        .low-stock-card h3 {
+            margin: 0 0 0.8rem;
+            font-size: 1.35rem;
+        }
+        .low-stock-card .big-number {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: var(--danger);
+            margin: 0.4rem 0;
+        }
+        .low-stock-card .meta {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 0.6rem;
+        }
+        .alert-box {
+            margin-top: 1.2rem;
+            padding: 0.8rem;
+            background: rgba(239,68,68,0.1);
+            border: 1px dashed var(--danger);
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--danger);
+        }
+        #noLowStock {
+            display: none;
+            text-align: center;
+            padding: 4rem;
+            color: var(--success);
+            font-size: 1.3rem;
+        }
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
+            .main-content { padding: 1.8rem; }
+        }
+    </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
 <div class="topbar">
     <h2>Inventory System</h2>
     <span id="userRole">ADMIN</span>
 </div>
 
-<!-- MAIN LAYOUT -->
 <div class="container">
-
-    <!-- SIDEBAR -->
     <div class="sidebar">
-    <a href="dashboard.html">📊 Dashboard</a>
-    <a href="products.html">📦 Products</a>
-    <a href="low-stock.html">⚠ Low Stock</a>
-
-    <!-- ADMIN ONLY -->
-    <a href="add-product.html" class="admin-only">➕ Add Product</a>
-    <a href="categories.html" class="admin-only">📁 Categories</a>
-
-    <a href="login.html" class="logout">➜ Logout</a>
-</div>
-
-
-    <!-- CONTENT -->
-    <div class="content">
-        <h2>⚠ Low Stock Products</h2>
-
-        <table class="product-table">
-            <thead>
-                <tr>
-                    <th>SKU</th>
-                    <th>Name</th>
-                    <th>Quantity</th>
-                    <th>Reorder Level</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="lowStockBody">
-                <!-- Low stock products load here -->
-            </tbody>
-        </table>
+        <a href="dashboard.html">📊 Dashboard</a>
+        <a href="products.html">📦 Products</a>
+        <a href="low-stock.html" class="active">⚠ Low Stock</a>
+        <a href="reports.html">📈 Reports & Analytics</a>
+        <a href="add-product.html" class="admin-only">➕ Add Product</a>
+        <a href="login.html" class="logout">➜ Logout</a>
     </div>
 
+    <div class="main-content">
+        <h2>Low Stock Products</h2>
+
+        <div class="grid-container" id="lowStockGrid"></div>
+
+        <p id="noLowStock" style="display:none; text-align:center; padding:4rem; color:#10b981; font-size:1.2rem;">
+            ✅ No low stock items at this time
+        </p>
+    </div>
 </div>
 
 <script src="js/auth.js"></script>
 <script>
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
-    document.getElementById("userRole").innerText = role;
+const token = localStorage.getItem("token");
+if (!token) window.location.href = "login.html";
 
-    fetch("http://localhost:8080/products/low-stock", {
-        headers: {
-            "Authorization": "Bearer " + token
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        const tbody = document.getElementById("lowStockBody");
+document.getElementById("userRole").innerText = localStorage.getItem("role") || "USER";
+
+async function loadLowStock() {
+    try {
+        const res = await fetch("http://localhost:8080/products/low-stock", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (!res.ok) throw new Error("Failed to load low stock");
+        const data = await res.json();
+
+        const grid = document.getElementById("lowStockGrid");
+        const noMsg = document.getElementById("noLowStock");
+        grid.innerHTML = "";
 
         if (data.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" style="text-align:center; color:green;">
-                        ✅ No low stock items
-                    </td>
-                </tr>
-            `;
+            noMsg.style.display = "block";
             return;
         }
 
+        noMsg.style.display = "none";
+
         data.forEach(p => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${p.sku}</td>
-                <td>${p.name}</td>
-                <td>${p.quantity}</td>
-                <td>${p.reorderLevel}</td>
-                <td><span class="low-stock">LOW</span></td>
+            const urgency = p.quantity <= p.reorderLevel / 2 ? "critical" : "warning";
+
+            const card = document.createElement("div");
+            card.className = `card low-stock-card ${urgency}`;
+
+            card.innerHTML = `
+                <div class="product-header">
+                    <h3>${p.name}</h3>
+                    <span class="sku">SKU: ${p.sku}</span>
+                </div>
+                <div class="stock-info">
+                    <p class="big-number">${p.quantity}</p>
+                    <p><strong>Reorder Level:</strong> ${p.reorderLevel}</p>
+                    <p><strong>Price:</strong> ₹${Number(p.unitPrice || 0).toFixed(2)}</p>
+                </div>
+                <div class="alert-box">
+                    <span>⚠ Low Stock - Restock Recommended</span>
+                </div>
             `;
-            tbody.appendChild(row);
+            grid.appendChild(card);
         });
-    });
-     if (role !== "ADMIN") {
-    document.querySelectorAll(".admin-only")
-      .forEach(el => el.style.display = "none");
-  }
+
+    } catch (err) {
+        alert("Error loading low stock: " + err.message);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", loadLowStock);
 </script>
 
 </body>

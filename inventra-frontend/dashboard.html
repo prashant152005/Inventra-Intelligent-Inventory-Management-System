@@ -2,64 +2,231 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventra Dashboard</title>
-    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --danger-light: #fef2f2;
+            --success: #10b981;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-md: 0 10px 25px rgba(0,0,0,0.09);
+            --radius-lg: 16px;
+        }
+        body {
+            margin: 0;
+            font-family: system-ui, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-main);
+        }
+        .topbar {
+            height: 70px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .container { display: flex; min-height: calc(100vh - 70px); }
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 0;
+        }
+        .sidebar a {
+            display: block;
+            padding: 1rem 1.8rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.25s;
+        }
+        .sidebar a:hover { background: rgba(99,102,241,0.08); }
+        .sidebar a.active { background: var(--primary); color: white; }
+        .main-content { flex: 1; padding: 2.5rem 3rem; }
+        h2 { font-size: 2.1rem; margin-bottom: 2rem; }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        .card.kpi {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.35s;
+        }
+        .card.kpi:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-md);
+        }
+        .card.blue { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; }
+        .card.orange { background: linear-gradient(135deg, #fb923c, #f97316); color: white; }
+        .card.kpi .icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.94; }
+        .card.kpi h2 { font-size: 4.2rem; font-weight: 800; margin: 0.3rem 0 0; line-height: 1; }
+        #lowStockAlerts {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.6rem;
+        }
+        .alert-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.6rem;
+            box-shadow: var(--shadow-sm);
+            border-left: 6px solid var(--warning);
+            transition: all 0.3s;
+        }
+        .alert-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
+        .alert-card.critical { border-left-color: var(--danger); background: var(--danger-light); }
+        .alert-card h4 { margin: 0 0 0.9rem; font-size: 1.3rem; }
+        .alert-card .qty { color: var(--danger); font-weight: 700; font-size: 1.15rem; }
+        .alert-card .meta { margin-top: 1.2rem; font-size: 0.88rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 1rem 0; }
+        }
+    </style>
 </head>
 <body>
 
 <div class="topbar">
-    <div>INVENTORY SYSTEM</div>
-    <div>ADMIN</div>
+    <h2>Inventory System</h2>
+    <span id="userRole">ADMIN</span>
 </div>
 
 <div class="container">
-
     <div class="sidebar">
-    <a href="dashboard.html">📊 Dashboard</a>
-    <a href="products.html">📦 Products</a>
-    <a href="low-stock.html">⚠ Low Stock</a>
-
-    <!-- ADMIN ONLY -->
-    <a href="add-product.html" class="admin-only">➕ Add Product</a>
-    <a href="categories.html" class="admin-only">📁 Categories</a>
-
-    <a href="login.html" class="logout">➜ Logout</a>
+        <a href="dashboard.html" class="active">📊 Dashboard</a>
+        <a href="products.html">📦 Products</a>
+        <a href="low-stock.html">⚠ Low Stock</a>
+        <a href="reports.html">📈 Reports</a>
+        <a href="add-product.html" class="admin-only">➕ Add Product</a>
+<a href="register.html" class="admin-only">👤 Register User</a>
+        <a href="login.html" class="logout">➜ Logout</a>
     </div>
 
-
-    <div class="main">
-        <div class="page-title">Dashboard</div>
+    <div class="main-content">
+        <h2>Dashboard</h2>
 
         <div class="cards">
-            <div class="card blue">
+            <div class="card kpi blue">
                 <span class="icon">📦</span>
                 <p>Total Products</p>
                 <h2 id="totalProducts">0</h2>
             </div>
 
-            <div class="card red clickable" onclick="goLowStock()">
+            <div class="card kpi orange clickable" onclick="goLowStock()">
                 <span class="icon">⚠️</span>
                 <p>Low Stock Items</p>
                 <h2 id="lowstock">0</h2>
             </div>
+        </div>
 
-            <div class="card green clickable" onclick="gocategories()">
-                <span class="icon">🗂️</span>
-                <p>Categories</p>
-                <h2 id="categoriesCount">0</h2>
-            </div>
+        <div class="card">
+            <h3>Active Low Stock Alerts</h3>
+            <div id="lowStockAlerts"></div>
         </div>
     </div>
-
 </div>
 
 <script src="js/dashboard.js"></script>
+<script src="js/common.js"></script>
 <script>
-  const role = localStorage.getItem("role");
-  if (role !== "ADMIN") {
-    document.querySelectorAll(".admin-only")
-      .forEach(el => el.classList.add("hide-column"));
-  }
+    // Role-based visibility
+    const role = localStorage.getItem("role") || "USER";
+    document.getElementById("userRole").innerText = role;
+
+    if (role !== "ADMIN") {
+        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
+    }
+
+    function goLowStock() {
+        window.location.href = "low-stock.html";
+    }
+
+    // Load low stock alerts (fixed to show actual product name)
+    async function loadLowStockAlerts() {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            const res = await fetch("http://localhost:8080/alerts/low-stock", {
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (!res.ok) throw new Error("Failed to load alerts");
+            const alerts = await res.json();
+
+            const container = document.getElementById("lowStockAlerts");
+            container.innerHTML = "";
+
+            if (alerts.length === 0) {
+                container.innerHTML = '<p class="text-center text-success">No active low stock alerts</p>';
+                return;
+            }
+
+            alerts.forEach(alert => {
+                // Extract product name from message or product object
+                let productName = "Unknown Product";
+                if (alert.product && alert.product.name) {
+                    productName = alert.product.name;
+                } else if (alert.message) {
+                    // Fallback: try to parse name from message
+                    const match = alert.message.match(/Low stock detected: (.*?) \(Qty/);
+                    if (match && match[1]) productName = match[1].trim();
+                }
+
+                const qtyMatch = alert.message.match(/Qty: (\d+)/);
+                const qty = qtyMatch ? qtyMatch[1] : "Unknown";
+
+                const reorderMatch = alert.message.match(/Reorder: (\d+)/);
+                const reorder = reorderMatch ? reorderMatch[1] : "Unknown";
+
+                const triggered = new Date(alert.triggeredAt).toLocaleString();
+
+                const card = document.createElement("div");
+                card.className = "alert-card";
+                card.innerHTML = `
+                    <h4>Low stock alert: '${productName}'</h4>
+                    <p class="qty">Only ${qty} units left (Reorder Level: ${reorder})</p>
+                    <div class="meta">
+                        <span>Triggered: ${triggered}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById("lowStockAlerts").innerHTML = 
+                '<p class="text-danger">Error loading alerts</p>';
+        }
+    }
+
+    // Call on page load
+    document.addEventListener("DOMContentLoaded", loadLowStockAlerts);
+    
+    // Load alerts when page loads + refresh every 60 seconds
+    document.addEventListener("DOMContentLoaded", () => {
+        refreshLowStockAlerts();                    // Load immediately
+        setInterval(refreshLowStockAlerts, 60000);  // Every 1 minute
+    });
 </script>
 
 </body>

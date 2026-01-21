@@ -7,9 +7,11 @@ import com.inventra.auth.security.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -17,13 +19,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       JwtUtil jwtUtil) {
+                       JwtUtil jwtUtil, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.emailService = emailService;
     }
 
     // ADMIN creates users (EMPLOYEE)
@@ -63,4 +67,40 @@ public class UserService {
 
         return response;
     }
+
+    public void processForgotPassword(String email) {
+
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            return; // silently exit
+        }
+
+        User user = userOptional.get();
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+
+        emailService.sendResetMail(user.getEmail(), token);
+    }
+    public void resetPassword(String token, String newPassword) {
+
+        if (jwtUtil.isTokenExpired(token)) {
+            throw new RuntimeException("Token expired");
+        }
+
+        String email = jwtUtil.extractEmail(token);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+    // Add this method at the end of UserService.java
+    public List<String> getAllAdminEmails() {
+        return userRepository.findByRole("ADMIN")
+                .stream()
+                .map(User::getEmail)
+                .filter(email -> email != null && !email.isBlank())
+                .collect(Collectors.toList());
+    }
+
 }

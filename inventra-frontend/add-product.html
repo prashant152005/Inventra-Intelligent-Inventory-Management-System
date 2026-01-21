@@ -1,11 +1,125 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Product | Inventra</title>
-    <link rel="stylesheet" href="css/add-product.css">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 4px 12px rgba(0,0,0,0.06);
+            --radius-lg: 16px;
+        }
+        body {
+            background: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            font-family: system-ui, sans-serif;
+        }
+        .topbar {
+            height: 70px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .container { display: flex; min-height: calc(100vh - 70px); }
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 0;
+        }
+        .sidebar a {
+            display: block;
+            padding: 1rem 1.8rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.25s;
+        }
+        .sidebar a:hover { background: rgba(99,102,241,0.08); }
+        .sidebar a.active { background: var(--primary); color: white; }
+        .main-content { flex: 1; padding: 2.5rem 3rem; }
+        h2 { font-size: 2rem; margin-bottom: 2rem; font-weight: 700; }
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-sm);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.6rem;
+        }
+        .form-grid label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        .form-grid input {
+            width: 100%;
+            padding: 0.9rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .form-grid input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+        }
+        .form-grid .full {
+            grid-column: span 2;
+        }
+        .primary-btn {
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        .primary-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(99,102,241,0.3);
+        }
+        .error {
+            color: var(--danger);
+            margin-top: 1rem;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
+            .main-content { padding: 1.8rem; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-grid .full { grid-column: span 1; }
+        }
+    </style>
 </head>
-
-<body class="light">
+<body>
 
 <div class="topbar">
     <h2>Inventory System</h2>
@@ -13,37 +127,41 @@
 </div>
 
 <div class="container">
-
     <div class="sidebar">
         <a href="dashboard.html">📊 Dashboard</a>
         <a href="products.html">📦 Products</a>
         <a href="low-stock.html">⚠ Low Stock</a>
+        <a href="reports.html">📈 Reports</a>
         <a href="add-product.html" class="admin-only">➕ Add Product</a>
-        <a href="categories.html" class="admin-only">📁 Categories</a>
-        <a href="login.html" class="logout">➜ Logout</a>
+        <a href="login.html">➜ Logout</a>
     </div>
 
-    <div class="content">
+    <div class="main-content">
         <h2>Add New Product</h2>
 
         <div class="card">
+            <div class="form-grid">
+                <label for="sku">SKU</label>
+                <input id="sku" placeholder="SKU" required>
 
-            <form id="addProductForm">
-                <div class="form-grid">
-                    <input type="text" placeholder="SKU" id="sku" required />
-                    <input type="text" placeholder="Product Name" id="name" required />
-                    <input type="number" placeholder="Quantity" id="quantity" required />
-                    <input type="number" placeholder="Reorder Level" id="reorderLevel" required />
-                    <input type="number" placeholder="Unit Price" id="unitPrice" required />
-                    <input type="text" placeholder="Description" id="description" />
-                </div>
+                <label for="name">Product Name</label>
+                <input id="name" placeholder="Product Name" required>
 
-                <button type="button" onclick="addProduct()" class="primary-btn">
-                    Add Product
-                </button>
+                <label for="quantity">Initial Quantity</label>
+                <input id="quantity" type="number" placeholder="Initial Quantity" required min="0">
 
-                <p id="msg" style="margin-top:12px;font-weight:600;"></p>
-            </form>
+                <label for="reorderLevel">Reorder Level</label>
+                <input id="reorderLevel" type="number" placeholder="Reorder Level" required min="0">
+
+                <label for="unitPrice">Unit Price</label>
+                <input id="unitPrice" type="number" step="0.01" placeholder="Unit Price" required min="0">
+
+                <label for="description">Description</label>
+                <input id="description" class="full" placeholder="Description">
+            </div>
+
+            <button class="primary-btn" onclick="addProduct()">Add Product</button>
+            <p id="msg" class="error"></p>
         </div>
     </div>
 </div>
