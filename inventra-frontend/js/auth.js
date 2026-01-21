@@ -1,19 +1,25 @@
 const API_URL = "http://localhost:8080";
 
 /* ================= REGISTER (ADMIN ONLY) ================= */
+/* ================= REGISTER (ADMIN ONLY) ================= */
 function registerUser() {
-
-    const username = document.getElementById("username").value;
-    const email = document.getElementById("email").value;
-    const contactNumber = document.getElementById("contactNumber").value;
+    const username = document.getElementById("username").value.trim();
+    const fullName = document.getElementById("fullName").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const contactNumber = document.getElementById("contactNumber").value.trim();
     const password = document.getElementById("password").value;
     const confirmPassword = document.getElementById("confirmPassword").value;
 
-    // Admin always creates EMPLOYEE
-    const role = "EMPLOYEE";
+    // FIXED: Read the selected role from dropdown
+    const role = document.getElementById("role").value;
+
+    if (!username || !fullName || !email || !contactNumber || !password || !confirmPassword) {
+        document.getElementById("error").innerText = "All fields are required";
+        return;
+    }
 
     if (password !== confirmPassword) {
-        alert("Passwords do not match");
+        document.getElementById("error").innerText = "Passwords do not match";
         return;
     }
 
@@ -25,26 +31,32 @@ function registerUser() {
         },
         body: JSON.stringify({
             username,
+            fullName,
             email,
             contactNumber,
             password,
-            role
+            role  // ← Now sends the actual selected value (ADMIN or EMPLOYEE)
         })
     })
     .then(res => {
         if (!res.ok) {
-            throw new Error("Forbidden");
+            return res.text().then(text => {
+                throw new Error(text || "Registration failed");
+            });
         }
         return res.json();
     })
     .then(() => {
-        alert("Employee registered successfully");
+        alert("User registered successfully!");
+        window.location.href = "dashboard.html";
     })
-    .catch(() => {
-        document.getElementById("error").innerText =
-            "Only ADMIN can register employees";
+    .catch(err => {
+        console.error(err);
+        document.getElementById("error").innerText = err.message;
     });
 }
+
+// ... rest of your auth.js code (login, logout, etc.) remains unchanged ...
 
 /* ================= LOGIN ================= */
 function loginUser() {

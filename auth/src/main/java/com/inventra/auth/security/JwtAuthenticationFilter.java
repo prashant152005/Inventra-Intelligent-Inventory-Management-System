@@ -23,24 +23,45 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return path.startsWith("/auth") ||
+                path.startsWith("/css") ||
+                path.startsWith("/js") ||
+                path.startsWith("/images");
+    }
 
+    @Override
+    protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
-        System.out.println("REQUEST URI = " + request.getRequestURI());
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
-            String token = authHeader.substring(7);
+        System.out.println("FILTER HIT: " + request.getRequestURI());
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String token = authHeader.substring(7);
+
+        try {
+            if (jwtUtil.isTokenExpired(token)) {
+                System.out.println("Token expired for: " + request.getRequestURI());
+                filterChain.doFilter(request, response);
+                return;
+            }
 
             String email = jwtUtil.extractEmail(token);
             String role = jwtUtil.extractRole(token);
 
             System.out.println("ROLE FROM TOKEN = " + role);
 
+            // This creates authority "ROLE_ADMIN" or "ROLE_EMPLOYEE"
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             email,
@@ -49,6 +70,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (Exception e) {
+            System.out.println("JWT processing error: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);

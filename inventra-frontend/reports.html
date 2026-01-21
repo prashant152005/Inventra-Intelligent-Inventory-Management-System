@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics | Inventra</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #111827;
+            --muted: #6b7280;
+            --border: #e2e8f0;
+        }
+
+        body {
+            background: var(--light);
+            color: var(--dark);
+            font-family: system-ui, -apple-system, sans-serif;
+            padding-top: 72px; /* space for fixed topbar */
+        }
+
+        /* ================= TOPBAR ================= */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 72px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        /* ================= SIDEBAR ================= */
+        .sidebar {
+            position: fixed;
+            top: 72px;
+            left: 0;
+            width: 260px;
+            height: calc(100vh - 72px);
+            background: white;
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 0;
+            overflow-y: auto;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 1rem 1.8rem;
+            color: var(--muted);
+            text-decoration: none;
+            transition: all 0.25s;
+        }
+
+        .sidebar a:hover {
+            background: rgba(99,102,241,0.08);
+        }
+
+        .sidebar a.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ================= MAIN CONTENT ================= */
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        /* ================= CARDS ================= */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            border: none;
+        }
+
+        .table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .low-stock {
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 992px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                top: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            body {
+                padding-top: 0;
+            }
+
+            .topbar {
+                position: relative;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+    <h2 class="mb-0">Inventory System</h2>
+    <span id="userRole" class="badge bg-primary">ADMIN</span>
+</div>
+
+<div class="container d-flex">
+    <!-- Sidebar -->
+     <div class="sidebar">
+        <a href="dashboard.html">📊 Dashboard</a>
+        <a href="products.html">📦 Products</a>
+        <a href="low-stock.html">⚠ Low Stock</a>
+        <a href="reports.html">📈 Reports</a>
+        <a href="add-product.html" class="admin-only">➕ Add Product</a>
+        <a href="login.html">➜ Logout</a>
+    </div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <h2 class="mb-4">Reports & Analytics</h2>
+
+        <!-- Sales Report Card -->
+        <div class="card">
+            <div class="card-header">Sales Report</div>
+            <div class="card-body">
+                <div class="row g-3 filter-row mb-4">
+                    <div class="col-md-4">
+                        <label for="startDate" class="form-label">From</label>
+                        <input type="date" class="form-control" id="startDate">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="endDate" class="form-label">To</label>
+                        <input type="date" class="form-control" id="endDate">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end buttons">
+                        <button class="btn btn-primary me-2" onclick="loadSalesReport()">Generate Report</button>
+                        <button class="btn btn-success" onclick="exportSalesCsv()">Export as CSV</button>
+                    </div>
+                </div>
+
+                <div id="salesReportCard" style="display:none;">
+                    <div id="salesSummary" class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Period</h6>
+                                    <p id="period" class="mb-0 fw-bold"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Total Revenue</h6>
+                                    <p id="totalRevenue" class="mb-0 fw-bold text-success">₹0.00</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Total Transactions</h6>
+                                    <p id="totalTransactions" class="mb-0 fw-bold">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5>Top 5 Products</h5>
+                    <div id="topProducts" class="mb-4"></div>
+
+                    <h5>Daily Sales Trend</h5>
+                    <canvas id="salesChart" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Report Card -->
+        <div class="card">
+            <div class="card-header">Current Inventory Status</div>
+            <div class="card-body">
+                <div id="inventorySummary" class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6>Total Products</h6>
+                                <p class="mb-0 fw-bold">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6>Total Stock Value</h6>
+                                <p class="mb-0 fw-bold text-success">₹0.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6>Low Stock Items</h6>
+                                <p class="mb-0 fw-bold text-warning">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6>Out of Stock</h6>
+                                <p class="mb-0 fw-bold text-danger">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5>Low Stock Products</h5>
+                <table class="table table-hover report-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>SKU</th>
+                            <th>Quantity</th>
+                            <th>Reorder Level</th>
+                            <th>Value (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lowStockTableBody">
+                        <tr><td colspan="5" class="text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+
+                <button class="btn btn-success mt-3" onclick="exportInventoryCsv()">Export Inventory as CSV</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/auth.js"></script>
+<script>
+// Role-based visibility
+const token = localStorage.getItem("token");
+if (!token) window.location.href = "login.html";
+
+const role = localStorage.getItem("role") || "USER";
+document.getElementById("userRole").innerText = role;
+
+if (role !== "ADMIN" && role !== "MANAGER") {
+    document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
+}
+
+// Default date range: last 30 days
+const today = new Date();
+const lastMonth = new Date(today);
+lastMonth.setDate(today.getDate() - 30);
+
+document.getElementById("startDate").valueAsDate = lastMonth;
+document.getElementById("endDate").valueAsDate = today;
+
+// Chart instance
+let salesChartInstance = null;
+
+// Load Sales Report
+async function loadSalesReport() {
+    const start = document.getElementById("startDate").value;
+    const end = document.getElementById("endDate").value;
+
+    if (!start || !end) {
+        alert("Please select both start and end dates");
+        return;
+    }
+
+    try {
+        const res = await fetch(`http://localhost:8080/reports/sales?startDate=${start}&endDate=${end}`, {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (!res.ok) throw new Error("Failed to load sales report");
+        const data = await res.json();
+
+        document.getElementById("salesReportCard").style.display = "block";
+
+        // Summary
+        document.getElementById("period").textContent = `${start} to ${end}`;
+        document.getElementById("totalRevenue").textContent = `₹${data.totalRevenue.toFixed(2)}`;
+        document.getElementById("totalTransactions").textContent = data.totalTransactions;
+
+        // Top Products
+        let topHtml = "<ul class='list-group list-group-flush'>";
+        data.topProducts.forEach(p => {
+            topHtml += `
+                <li class="list-group-item">
+                    <strong>${p.productName}</strong> (${p.sku})<br>
+                    <small>${p.quantitySold} sold • ₹${p.revenue.toFixed(2)}</small>
+                </li>`;
+        });
+        topHtml += "</ul>";
+        document.getElementById("topProducts").innerHTML = topHtml || "<p class='text-muted'>No sales in this period</p>";
+
+        // Chart
+        const ctx = document.getElementById("salesChart").getContext("2d");
+        if (salesChartInstance) salesChartInstance.destroy();
+
+        salesChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.dailySales.map(d => d.date),
+                datasets: [{
+                    label: 'Daily Revenue (₹)',
+                    data: data.dailySales.map(d => d.revenue),
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99,102,241,0.2)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+    } catch (err) {
+        alert("Error loading sales report: " + err.message);
+    }
+}
+
+// Export Sales CSV (fixed with Authorization header)
+async function exportSalesCsv() {
+    const start = document.getElementById("startDate").value;
+    const end = document.getElementById("endDate").value;
+
+    if (!start || !end) {
+        alert("Please select date range first");
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `http://localhost:8080/reports/sales/csv?startDate=${start}&endDate=${end}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            }
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Export failed (${response.status}): ${errorText}`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sales-report-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error("Export Error:", error);
+        alert("Failed to download sales report:\n" + error.message);
+    }
+}
+
+// Load Inventory Report on page load
+async function loadInventoryReport() {
+    try {
+        const res = await fetch("http://localhost:8080/reports/inventory", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (!res.ok) throw new Error("Failed to load inventory report");
+        const data = await res.json();
+
+        document.getElementById("inventorySummary").innerHTML = `
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6>Total Products</h6>
+                            <p class="mb-0 fw-bold">${data.totalProducts}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6>Total Stock Value</h6>
+                            <p class="mb-0 fw-bold text-success">₹${data.totalStockValue.toFixed(2)}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6>Low Stock Items</h6>
+                            <p class="mb-0 fw-bold text-warning">${data.lowStockCount}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6>Out of Stock</h6>
+                            <p class="mb-0 fw-bold text-danger">${data.outOfStockCount}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const tbody = document.getElementById("lowStockTableBody");
+        tbody.innerHTML = "";
+
+        if (data.lowStockProducts.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5' class='text-center text-success'>No low stock items</td></tr>";
+            return;
+        }
+
+        data.lowStockProducts.forEach(p => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${p.name}</td>
+                <td>${p.sku}</td>
+                <td class="low-stock">${p.quantity}</td>
+                <td>${p.reorderLevel}</td>
+                <td>₹${p.value.toFixed(2)}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+    } catch (err) {
+        alert("Error loading inventory report: " + err.message);
+    }
+}
+
+// Export Inventory CSV (fixed with Authorization header)
+async function exportInventoryCsv() {
+    try {
+        const response = await fetch("http://localhost:8080/reports/inventory/csv", {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Export failed (${response.status}): ${errorText}`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `inventory-report-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error("Export Error:", error);
+        alert("Failed to download inventory report:\n" + error.message);
+    }
+}
+
+// Load inventory on page load
+document.addEventListener("DOMContentLoaded", loadInventoryReport);
+</script>
+</body>
+</html>

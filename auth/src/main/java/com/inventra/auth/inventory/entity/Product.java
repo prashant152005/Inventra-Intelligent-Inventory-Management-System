@@ -1,7 +1,14 @@
 package com.inventra.auth.inventory.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.inventra.auth.entity.Alert;
+import com.inventra.auth.entity.StockTransaction;
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -14,17 +21,30 @@ public class Product {
     @Column(unique = true)
     private String sku;
 
+    @Column(nullable = false)
     private String name;
+
     private String description;
+
     private Double unitPrice;
+
     private Integer quantity;
+
     private Integer reorderLevel;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // Getters & Setters
+    // New relationships - with @JsonIgnore to prevent circular JSON serialization
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonIgnore  // ← Critical fix: prevents infinite recursion in JSON
+    private List<StockTransaction> stockTransactions = new ArrayList<>();
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonIgnore  // ← Critical fix: prevents infinite recursion in JSON
+    private List<Alert> alerts = new ArrayList<>();
+
+    // Getters & Setters (existing + new)
     public Long getProductId() { return productId; }
     public void setProductId(Long productId) { this.productId = productId; }
 
@@ -47,4 +67,11 @@ public class Product {
     public void setReorderLevel(Integer reorderLevel) { this.reorderLevel = reorderLevel; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public List<StockTransaction> getStockTransactions() { return stockTransactions; }
+    public void setStockTransactions(List<StockTransaction> stockTransactions) { this.stockTransactions = stockTransactions; }
+
+    public List<Alert> getAlerts() { return alerts; }
+    public void setAlerts(List<Alert> alerts) { this.alerts = alerts; }
 }
