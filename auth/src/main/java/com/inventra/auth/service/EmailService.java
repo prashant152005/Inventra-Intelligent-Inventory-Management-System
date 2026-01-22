@@ -10,7 +10,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import java.util.*;
+
+import java.util.List;
 
 @Service
 public class EmailService {
@@ -22,38 +23,39 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    private String adminEmail;
-
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
-    /**
-     * Sends password reset email with reset link
-     */
-    private static final String FRONTEND_URL = "https://inventra-frontend.surge.sh";
+    // ================= RESET PASSWORD MAIL =================
+    private static final String FRONTEND_URL =
+            "https://inventra-frontend.surge.sh";
+
     public void sendResetMail(String to, String token) {
+
         try {
             logger.info("Sending password reset email to: {}", to);
 
-            String resetLink = FRONTEND_URL + "/reset-password.html?token=" + token;
+            String resetLink =
+                    FRONTEND_URL + "/reset-password.html?token=" + token;
+
             String subject = "Inventra - Password Reset Request";
 
             String textBody = """
-                Hello,
+                    Hello,
 
-                You requested a password reset for your Inventra account.
+                    You requested a password reset for your Inventra account.
 
-                Click the link below to reset your password:
-                %s
+                    Click the link below to reset your password:
+                    %s
 
-                This link will expire in 24 hours.
+                    This link will expire in 24 hours.
 
-                If you did not request this, please ignore this email.
+                    If you did not request this, please ignore this email.
 
-                Regards,
-                Inventra Team
-                """.formatted(resetLink);
+                    Regards,
+                    Inventra Team
+                    """.formatted(resetLink);
 
             sendSimpleEmail(to, subject, textBody);
 
@@ -64,10 +66,9 @@ public class EmailService {
         }
     }
 
-    /**
-     * Sends low stock alert notification to admin
-     */
+    // ================= LOW STOCK ALERT =================
     public void sendLowStockAlert(Product product, List<String> recipientEmails) {
+
         if (recipientEmails == null || recipientEmails.isEmpty()) {
             logger.warn("No admin emails found for low stock alert");
             return;
@@ -80,28 +81,32 @@ public class EmailService {
             String subject = "URGENT: Low Stock Alert - " + product.getName();
 
             String htmlBody = """
-            <html>
-            <body>
-                <h2 style="color: red;">Low Stock Alert!</h2>
-                <p>The following product is low on stock:</p>
-                <ul>
-                    <li><strong>Product:</strong> %s</li>
-                    <li><strong>SKU:</strong> %s</li>
-                    <li><strong>Current Quantity:</strong> %d</li>
-                    <li><strong>Reorder Level:</strong> %d</li>
-                </ul>
-                <p>Please restock immediately!</p>
-                <p>Regards,<br/>Inventra Inventory System</p>
-            </body>
-            </html>
-            """.formatted(product.getName(), product.getSku(),
-                    product.getQuantity(), product.getReorderLevel());
+                    <html>
+                    <body>
+                        <h2 style="color: red;">Low Stock Alert!</h2>
+                        <p>The following product is low on stock:</p>
+                        <ul>
+                            <li><strong>Product:</strong> %s</li>
+                            <li><strong>SKU:</strong> %s</li>
+                            <li><strong>Current Quantity:</strong> %d</li>
+                            <li><strong>Reorder Level:</strong> %d</li>
+                        </ul>
+                        <p>Please restock immediately!</p>
+                        <p>Regards,<br/>Inventra Inventory System</p>
+                    </body>
+                    </html>
+                    """.formatted(
+                    product.getName(),
+                    product.getSku(),
+                    product.getQuantity(),
+                    product.getReorderLevel()
+            );
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom(fromEmail);
-            helper.setTo(recipientEmails.toArray(new String[0]));  // Multiple recipients
+            helper.setTo(recipientEmails.toArray(new String[0]));
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
 
@@ -114,9 +119,9 @@ public class EmailService {
         }
     }
 
-    // ── Helper Methods ──────────────────────────────────────────────────────
-
+    // ================= HELPER =================
     private void sendSimpleEmail(String to, String subject, String text) {
+
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(to);
@@ -126,7 +131,8 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    private void sendHtmlEmail(String to, String subject, String htmlContent)
+
+private void sendHtmlEmail(String to, String subject, String htmlContent)
             throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");

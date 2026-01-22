@@ -16,6 +16,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of(
+                "https://inventra-frontend.surge.sh",
                 "http://localhost:5500",
                 "http://127.0.0.1:5500"
         ));

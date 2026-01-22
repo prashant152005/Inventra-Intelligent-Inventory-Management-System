@@ -7,10 +7,8 @@ import com.inventra.auth.security.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Map;
-import java.util.HashMap;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,14 +21,15 @@ public class UserService {
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       JwtUtil jwtUtil, EmailService emailService) {
+                       JwtUtil jwtUtil,
+                       EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.emailService = emailService;
     }
 
-    // ADMIN creates users (EMPLOYEE)
+    // ================= ADMIN CREATE USER =================
     public User saveUser(User user) {
         if (user.getRole().equalsIgnoreCase("ADMIN")) {
             user.setUserId("ADM-" + System.currentTimeMillis());
@@ -41,13 +40,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // LOGIN
+    // ================= LOGIN =================
     public Map<String, String> login(LoginRequest request) {
 
         Map<String, String> response = new HashMap<>();
 
-        Optional<User> userOptional =
-                userRepository.findByEmail(request.getEmail());
+        Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
 
         if (userOptional.isEmpty()) {
             response.put("error", "User not found");
@@ -68,33 +66,42 @@ public class UserService {
         return response;
     }
 
+    // ================= FORGOT PASSWORD =================
     public void processForgotPassword(String email) {
 
         Optional<User> userOptional = userRepository.findByEmail(email);
-        if (userOptional.isEmpty()) {
-            return; // silently exit
-        }
+        if (userOptional.isEmpty()) return;
 
         User user = userOptional.get();
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
-        emailService.sendResetMail(user.getEmail(), token);
+        String resetToken = UUID.randomUUID().toString();
+
+        user.setResetToken(resetToken);
+        user.setResetTokenExpiry(LocalDateTime.now().plusHours(24));
+
+        userRepository.save(user);
+
+        emailService.sendResetMail(user.getEmail(), resetToken);
     }
+
+    // ================= RESET PASSWORD =================
     public void resetPassword(String token, String newPassword) {
 
-        if (jwtUtil.isTokenExpired(token)) {
-            throw new RuntimeException("Token expired");
+        User user = userRepository.findByResetToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid reset token"));
+
+        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Reset token expired");
         }
 
-        String email = jwtUtil.extractEmail(token);
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
         user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+
         userRepository.save(user);
     }
-    // Add this method at the end of UserService.java
+
+    // ================= ADMIN EMAILS =================
     public List<String> getAllAdminEmails() {
         return userRepository.findByRole("ADMIN")
                 .stream()
@@ -102,5 +109,4 @@ public class UserService {
                 .filter(email -> email != null && !email.isBlank())
                 .collect(Collectors.toList());
     }
-
 }

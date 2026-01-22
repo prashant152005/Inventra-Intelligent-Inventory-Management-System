@@ -1,120 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Low Stock | Inventra</title>
-    <style>
-        :root {
-            --bg-main: #f8fafc;
-            --card-bg: #ffffff;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --danger-light: #fef2f2;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --shadow-sm: 0 4px 12px rgba(0,0,0,0.06);
-            --shadow-hover: 0 16px 40px rgba(0,0,0,0.13);
-            --radius-lg: 16px;
-        }
-        body {
-            background: var(--bg-main);
-            color: var(--text-main);
-            margin: 0;
-            font-family: system-ui, sans-serif;
-        }
-        .topbar {
-            height: 70px;
-            background: white;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 2.5rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .container { display: flex; min-height: calc(100vh - 70px); }
-        .sidebar {
-            width: 260px;
-            background: white;
-            border-right: 1px solid var(--border);
-            padding: 1.5rem 0;
-        }
-        .sidebar a {
-            display: block;
-            padding: 1rem 1.8rem;
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: all 0.25s;
-        }
-        .sidebar a:hover { background: rgba(245,158,11,0.08); }
-        .sidebar a.active { background: var(--warning); color: white; }
-        .main-content { flex: 1; padding: 2.5rem 3rem; }
-        h2 { font-size: 2rem; margin-bottom: 2rem; font-weight: 700; }
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
-        }
-        .low-stock-card {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 1.8rem;
-            box-shadow: var(--shadow-sm);
-            border-left: 6px solid var(--warning);
-            transition: all 0.3s ease;
-        }
-        .low-stock-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-hover);
-        }
-        .low-stock-card.critical {
-            border-left-color: var(--danger);
-            background: var(--danger-light);
-        }
-        .low-stock-card h3 {
-            margin: 0 0 0.8rem;
-            font-size: 1.35rem;
-        }
-        .low-stock-card .big-number {
-            font-size: 3.2rem;
-            font-weight: 800;
-            color: var(--danger);
-            margin: 0.4rem 0;
-        }
-        .low-stock-card .meta {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-top: 0.6rem;
-        }
-        .alert-box {
-            margin-top: 1.2rem;
-            padding: 0.8rem;
-            background: rgba(239,68,68,0.1);
-            border: 1px dashed var(--danger);
-            border-radius: 8px;
-            text-align: center;
-            font-weight: 600;
-            color: var(--danger);
-        }
-        #noLowStock {
-            display: none;
-            text-align: center;
-            padding: 4rem;
-            color: var(--success);
-            font-size: 1.3rem;
-        }
-        @media (max-width: 900px) {
-            .container { flex-direction: column; }
-            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
-            .main-content { padding: 1.8rem; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Low Stock | Inventra</title>
+
+<style>
+:root {
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --danger-light: #fff5f5;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --shadow-sm: 0 4px 10px rgba(0,0,0,0.06);
+    --radius: 12px;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: var(--bg-main);
+    color: var(--text-main);
+}
+
+/* ===== TOP BAR ===== */
+.topbar {
+    height: 64px;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+}
+
+/* ===== LAYOUT ===== */
+.container {
+    display: flex;
+    min-height: calc(100vh - 64px);
+}
+
+.sidebar {
+    width: 240px;
+    background: white;
+    border-right: 1px solid var(--border);
+    padding: 1rem 0;
+}
+
+.sidebar a {
+    display: block;
+    padding: 0.85rem 1.6rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.sidebar a.active {
+    background: var(--warning);
+    color: white;
+}
+
+.main-content {
+    flex: 1;
+    padding: 2rem 2.5rem;
+}
+
+h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.7rem;
+}
+
+/* ===== GRID (KEY FIX) ===== */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 320px); /* 🔥 fixed compact width */
+    gap: 1.2rem;
+    justify-content: flex-start;
+}
+
+/* ===== CARD (COMPACT) ===== */
+.low-stock-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.3rem;
+    border-left: 5px solid var(--warning);
+    box-shadow: var(--shadow-sm);
+}
+
+.low-stock-card.critical {
+    border-left-color: var(--danger);
+    background: var(--danger-light);
+}
+
+.low-stock-card h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.sku {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ===== NUMBERS ===== */
+.big-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--danger);
+    margin: 0.4rem 0;
+}
+
+.stock-info p {
+    margin: 0.25rem 0;
+    font-size: 0.85rem;
+}
+
+/* ===== ALERT BOX ===== */
+.alert-box {
+    margin-top: 0.8rem;
+    padding: 0.6rem;
+    font-size: 0.8rem;
+    background: rgba(239,68,68,0.08);
+    border: 1px dashed var(--danger);
+    border-radius: 6px;
+    text-align: center;
+    color: var(--danger);
+    font-weight: 600;
+}
+
+/* ===== EMPTY STATE ===== */
+#noLowStock {
+    display: none;
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 1rem;
+    color: #10b981;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    .container { flex-direction: column; }
+    .sidebar { width: 100%; }
+    .main-content { padding: 1.5rem; }
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 </head>
+
 <body>
 
 <div class="topbar">
@@ -127,9 +166,9 @@
         <a href="dashboard.html">📊 Dashboard</a>
         <a href="products.html">📦 Products</a>
         <a href="low-stock.html" class="active">⚠ Low Stock</a>
-        <a href="reports.html">📈 Reports & Analytics</a>
-        <a href="add-product.html" class="admin-only">➕ Add Product</a>
-        <a href="login.html" class="logout">➜ Logout</a>
+        <a href="reports.html">📈 Reports</a>
+        <a href="add-product.html">➕ Add Product</a>
+        <a href="login.html">➜ Logout</a>
     </div>
 
     <div class="main-content">
@@ -137,64 +176,54 @@
 
         <div class="grid-container" id="lowStockGrid"></div>
 
-        <p id="noLowStock" style="display:none; text-align:center; padding:4rem; color:#10b981; font-size:1.2rem;">
-            ✅ No low stock items at this time
-        </p>
+        <p id="noLowStock">✅ No low stock items</p>
     </div>
 </div>
 
-<script src="js/auth.js"></script>
 <script>
 const token = localStorage.getItem("token");
-if (!token) window.location.href = "login.html";
-
-document.getElementById("userRole").innerText = localStorage.getItem("role") || "USER";
+document.getElementById("userRole").innerText =
+    localStorage.getItem("role") || "USER";
 
 async function loadLowStock() {
     try {
         const res = await fetch("http://localhost:8080/products/low-stock", {
-            headers: { "Authorization": "Bearer " + token }
+            headers: { Authorization: "Bearer " + token }
         });
-
-        if (!res.ok) throw new Error("Failed to load low stock");
         const data = await res.json();
 
         const grid = document.getElementById("lowStockGrid");
-        const noMsg = document.getElementById("noLowStock");
+        const empty = document.getElementById("noLowStock");
         grid.innerHTML = "";
 
-        if (data.length === 0) {
-            noMsg.style.display = "block";
+        if (!data.length) {
+            empty.style.display = "block";
             return;
         }
 
-        noMsg.style.display = "none";
+        empty.style.display = "none";
 
         data.forEach(p => {
-            const urgency = p.quantity <= p.reorderLevel / 2 ? "critical" : "warning";
-
+            const critical = p.quantity <= p.reorderLevel / 2;
             const card = document.createElement("div");
-            card.className = `card low-stock-card ${urgency}`;
+            card.className = `low-stock-card ${critical ? "critical" : ""}`;
 
             card.innerHTML = `
-                <div class="product-header">
-                    <h3>${p.name}</h3>
-                    <span class="sku">SKU: ${p.sku}</span>
-                </div>
+                <h3>${p.name}</h3>
+                <div class="sku">SKU: ${p.sku}</div>
+                <div class="big-number">${p.quantity}</div>
                 <div class="stock-info">
-                    <p class="big-number">${p.quantity}</p>
-                    <p><strong>Reorder Level:</strong> ${p.reorderLevel}</p>
-                    <p><strong>Price:</strong> ₹${Number(p.unitPrice || 0).toFixed(2)}</p>
+                    <p><strong>Reorder:</strong> ${p.reorderLevel}</p>
+                    <p><strong>Price:</strong> ₹${Number(p.unitPrice).toFixed(2)}</p>
                 </div>
                 <div class="alert-box">
-                    <span>⚠ Low Stock - Restock Recommended</span>
+                    ⚠ Low Stock – Restock Recommended
                 </div>
             `;
             grid.appendChild(card);
         });
-
-    } catch (err) {
-        alert("Error loading low stock: " + err.message);
+    } catch (e) {
+        alert("Failed to load low stock");
     }
 }
 
