@@ -51,7 +51,7 @@ public class ProductService {
 
     public Product updateProduct(Product updated) {
         Product existing = repo.findById(updated.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         // Update only allowed fields:
         existing.setName(updated.getName());
