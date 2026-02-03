@@ -8,20 +8,21 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Features](#features)
-3. [Tech Stack](#tech-stack)
-4. [Frontend Pages](#frontend-pages)
-5. [Backend Structure](#backend-structure)
-6. [Prerequisites](#prerequisites)
-7. [Setup and Installation](#setup-and-installation)
+2. [Project Demo Videos](#project-demo-videos)
+3. [Features](#features)
+4. [Tech Stack](#tech-stack)
+5. [Frontend Pages](#frontend-pages)
+6. [Backend Structure](#backend-structure)
+7. [Prerequisites](#prerequisites)
+8. [Setup and Installation](#setup-and-installation)
    * [Backend Setup](#backend-setup)
    * [Frontend Setup](#frontend-setup)
-8. [Running the Application](#running-the-application)
-9. [Security](#security)
-10. [Usage](#usage)
-11. [Contributing](#contributing)
-12. [License](#license)
-13. [Project Owners](#project-owners)
+9. [Running the Application](#running-the-application)
+10. [Security](#security)
+11. [Usage](#usage)
+12. [Contributing](#contributing)
+13. [License](#license)
+14. [Project Owners](#project-owners)
 
 ---
 
@@ -38,6 +39,17 @@ Inventra provides a structured platform to:
 The backend follows a layered architecture and exposes RESTful APIs to separate frontend presentation from business logic.
 
 ---
+
+## Project Demo Videos
+
+
+### Admin Login Demonstration
+This video showcases admin authentication, inventory management features, user control, and system-level operations.  
+Watch Video:  https://drive.google.com/file/d/1_4QSifP8L28IqoYxN7UtzJXl9W9N579J/view?usp=sharing
+
+### Employee Login Demonstration
+This video demonstrates the employee authentication process, dashboard access, and core functionalities available to employees.  
+Watch Video:  https://drive.google.com/file/d/1_4e8o-dzqHcrT62gzKXwQCDDdQE8kwYK/view?usp=sharing
 
 ## Features
 
