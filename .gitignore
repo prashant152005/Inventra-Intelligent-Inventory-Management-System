@@ -24,3 +24,6 @@ Thumbs.db
 # Logs
 *.log
 logs/
+
+auth/src/main/resources/application.properties
+
