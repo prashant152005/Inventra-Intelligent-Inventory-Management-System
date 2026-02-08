@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Products | Inventra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Font & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+    <!-- Shared layout -->
+    <link rel="stylesheet" href="css/layout.css">
+
+    <!-- Products-only styles -->
+    <link rel="stylesheet" href="css/products.css">
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <h3><span class="text">Inventra</span></h3>
+
+    <a class="nav-link" href="dashboard.html">
+        <i class="fa-solid fa-chart-line"></i><span class="text">Dashboard</span>
+    </a>
+
+    <a class="nav-link active" href="products.html">
+        <i class="fa-solid fa-box"></i><span class="text">Products</span>
+    </a>
+
+    <a class="nav-link" href="low-stock.html">
+        <i class="fa-solid fa-triangle-exclamation"></i><span class="text">Low Stock</span>
+    </a>
+
+    <a class="nav-link" href="transactions.html">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i><span class="text">Transactions</span>
+    </a>
+
+    <a class="nav-link" href="reports.html">
+        <i class="fa-solid fa-chart-pie"></i><span class="text">Reports</span>
+    </a>
+
+
+    <a class="nav-link" href="categories.html"><i class="fa-solid fa-layer-group"></i>Categories</a>
+    <a class="nav-link" href="suppliers.html"><i class="fa-solid fa-truck"></i>Suppliers</a>
+
+    <a class="nav-link admin-only" href="register.html">
+        <i class="fa-solid fa-user-plus"></i><span class="text">Register User</span>
+    </a>
+
+    <a class="nav-link logout" href="login.html">
+        <i class="fa-solid fa-right-from-bracket"></i><span class="text">Logout</span>
+    </a>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+    <div class="topbar">
+        <h4>Products</h4>
+        <div>
+            <span id="userRole"></span>
+            <button class="icon-btn" id="themeToggle">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <button class="icon-btn" id="collapseBtn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </div>
+
+    <a class="nav-link nav-add-btn admin-only" href="add-product.html">
+        <i class="fa-solid fa-plus"></i>
+        <span class="text">Add Product</span>
+    </a>
+
+
+    <div class="content">
+        <table>
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Supplier</th>
+                <th>Quantity</th>
+                <th>Reorder Level</th>
+                <th>Unit Price (₹)</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="productTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- EDIT PRODUCT MODAL -->
+<div id="editModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3>Edit Product</h3>
+
+        <input type="hidden" id="editId">
+
+        <label>Name</label>
+        <input id="editName" disabled>
+
+        <label>Reorder Level</label>
+        <input id="editReorder" type="number">
+
+        <label>Unit Price (₹)</label>
+        <input id="editPrice" type="number">
+
+        <div class="modal-actions">
+            <button class="btn btn-edit" onclick="updateProduct()">Save</button>
+            <button class="btn btn-del" onclick="closeEdit()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/common.js"></script>
+<script src="js/products.js"></script>
+
+</body>
+</html>

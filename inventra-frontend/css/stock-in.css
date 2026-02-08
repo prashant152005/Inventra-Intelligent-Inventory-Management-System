@@ -1,0 +1,28 @@
+.card {
+    width: 400px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+label {
+    display: block;
+    margin-top: 12px;
+    font-weight: 600;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+}
+
+.btn-save {
+    margin-top: 20px;
+    width: 100%;
+    background: #2e7d32;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+}

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Product | Inventra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+    <style>
+        :root{
+          --bg:#f4f5ff;
+          --card:#ffffff;
+          --border:#e5e7eb;
+          --text:#111827;
+          --muted:#6b7280;
+          --primary:#6366f1;
+          --success:#059669;
+          --danger:#dc2626;
+          --radius:16px;
+          --shadow:0 12px 30px rgba(0,0,0,0.08);
+        }
+        .dark{
+          --bg:#111319;
+          --card:#1e2028;
+          --border:#2a2d38;
+          --text:#f1f1f1;
+          --muted:#9ca3af;
+        }
+
+        *{box-sizing:border-box;font-family:Inter,sans-serif;}
+
+        body{
+          margin:0;
+          background:var(--bg);
+          color:var(--text);
+          display:flex;
+          height:100vh;
+        }
+
+        /* Sidebar */
+        .sidebar{
+          width:250px;
+          background:var(--bg);
+          border-right:1px solid var(--border);
+          position:fixed;
+        }
+        .sidebar h3{padding:1.2rem;font-weight:700;}
+        .nav-link{
+          display:flex;align-items:center;gap:.8rem;
+          padding:.9rem 1.2rem;margin:.2rem .6rem;
+          border-radius:10px;text-decoration:none;
+          color:var(--text);font-weight:500;
+        }
+        .nav-link:hover{background:#eef2ff;}
+        .nav-link.active{background:var(--primary);color:#fff;}
+
+        /* Main */
+        .main{
+  margin-left: 250px;   /* SAME as sidebar width */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+        .topbar{
+          height:60px;
+          display:flex;align-items:center;justify-content:space-between;
+          padding:0 1.5rem;
+          background:var(--bg);
+          border-bottom:1px solid var(--border);
+        }
+        .icon-btn{background:none;border:none;font-size:1.1rem;cursor:pointer;}
+
+        .content{
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;   /* 👈 IMPORTANT */
+  padding: 2.5rem 2rem;
+}
+
+
+
+        /* Card */
+        .form-card{
+  width: 100%;
+  max-width: 520px;          /* 🔥 reduced from 620 */
+  background: var(--bg);
+  border-radius: 14px;       /* slightly smaller */
+  padding: 1.6rem;          /* 🔥 reduced padding */
+  box-shadow: 0 8px 20px rgba(0,0,0,0.07); /* lighter shadow */
+}
+
+        .form-title{
+          font-size:1.4rem;
+          font-weight:700;
+          margin-bottom:1.4rem;
+        }
+
+        /* Form */
+        .form-group{margin-bottom:1rem;}
+        label{font-size:.9rem;font-weight:600;color:var(--muted);}
+        input,select{
+          width:100%;
+          margin-top:.4rem;
+          padding:.65rem .75rem;
+          border-radius:10px;
+          border:1px solid var(--border);
+          background:transparent;
+          font-size:.9rem;
+        }
+        input:focus,select:focus{
+          outline:none;
+          border-color:var(--primary);
+          box-shadow:0 0 0 3px rgba(99,102,241,.15);
+        }
+
+        .btn-primary{
+          width:100%;
+          margin-top:1.6rem;
+          padding:.9rem;
+          border:none;
+          border-radius:12px;
+          background:linear-gradient(135deg,#6366f1,#4f46e5);
+          color:white;
+          font-size:1.05rem;
+          font-weight:600;
+          cursor:pointer;
+        }
+        .btn-primary:hover{opacity:.95;}
+
+        #msg{margin-top:1rem;text-align:center;font-weight:600;}
+        #msg.success{color:var(--success);}
+        #msg.error{color:var(--danger);}
+
+
+    </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h3>Inventra</h3>
+    <a class="nav-link" href="dashboard.html"><i class="fa-solid fa-chart-line"></i>Dashboard</a>
+    <a class="nav-link" href="products.html"><i class="fa-solid fa-box"></i>Products</a>
+    <a class="nav-link" href="low-stock.html">
+        <i class="fa-solid fa-triangle-exclamation"></i><span class="text">Low Stock</span>
+    </a>
+
+    <a class="nav-link" href="transactions.html">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i><span class="text">Transactions</span>
+    </a>
+
+    <a class="nav-link" href="reports.html">
+        <i class="fa-solid fa-chart-pie"></i><span class="text">Reports</span>
+    </a>
+    <a class="nav-link active" href="add-product.html"><i class="fa-solid fa-plus"></i>Add Product</a>
+    <a class="nav-link admin-only" href="register.html">
+        <i class="fa-solid fa-user-plus"></i><span class="text">Register User</span>
+    </a>
+
+    <a class="nav-link logout" href="login.html" style="color:#ff4f4f;">
+        <i class="fa-solid fa-right-from-bracket"></i><span class="text">Logout</span>
+    </a>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <h4>Add Product</h4>
+        <div>
+            <span id="userRole"></span>
+            <button class="icon-btn" id="themeToggle">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <button class="icon-btn" id="collapseBtn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-card">
+            <div class="form-title">New Product</div>
+
+            <div class="form-group">
+                <label>SKU</label>
+                <input id="sku" placeholder="SKU-001">
+            </div>
+
+            <div class="form-group">
+                <label>Product Name</label>
+                <input id="name" placeholder="Product name">
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+                <select id="category"></select>
+            </div>
+
+            <div class="form-group">
+                <label>Supplier</label>
+                <select id="supplier"></select>
+            </div>
+
+            <div class="form-group">
+                <label>Initial Quantity</label>
+                <input id="quantity" type="number" min="0">
+            </div>
+
+            <div class="form-group">
+                <label>Reorder Level</label>
+                <input id="reorderLevel" type="number" min="0">
+            </div>
+
+            <div class="form-group">
+                <label>Unit Price (₹)</label>
+                <input id="unitPrice" type="number" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label>Expiry Date</label>
+                <input type="date" id="expiryDate" required>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <input id="description" placeholder="Optional">
+            </div>
+
+            <button class="btn-primary" onclick="addProduct()">Add Product</button>
+            <div id="msg"></div>
+        </div>
+    </div>
+</div>
+
+<script src="js/add-product.js"></script>
+<script>
+    const role = localStorage.getItem("role") || "USER";
+    document.getElementById("userRole").innerText = role.toUpperCase();
+    document.getElementById("themeToggle").onclick=()=>document.documentElement.classList.toggle("dark");
+        // sidebar collapse
+    const sidebar = document.getElementById("sidebar");
+    document.getElementById("collapseBtn").onclick = () =>
+        sidebar.classList.toggle("collapsed");
+</script>
+</body>
+</html>

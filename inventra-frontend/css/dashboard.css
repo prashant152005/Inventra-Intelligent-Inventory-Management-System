@@ -1,0 +1,54 @@
+/* Dashboard cards grid */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+/* Individual card */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  padding: 1.4rem;
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+}
+
+/* Card content */
+.card-icon {
+  font-size: 2rem;
+  margin-bottom: 0.6rem;
+}
+
+.card-title {
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+.card-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 0.3rem;
+}
+
+/* Alerts */
+.alerts {
+  margin-top: 2.5rem;
+}
+
+.alerts h4 {
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+.muted {
+  opacity: 0.7;
+}

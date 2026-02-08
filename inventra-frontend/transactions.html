@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Transactions | Inventra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+    <style>
+        /* ================= THEME ================= */
+        :root{
+          --bg:#f4f5ff;
+          --card:rgba(255,255,255,0.55);
+          --border:rgba(255,255,255,0.7);
+          --text:#111;
+          --accent:#6c63ff;
+          --accent-soft:#e9e7ff;
+        }
+        .dark{
+          --bg:#111319;
+          --card:rgba(30,32,40,0.6);
+          --border:rgba(255,255,255,0.08);
+          --text:#f1f1f1;
+          --accent:#7b6dff;
+          --accent-soft:#1c1e29;
+        }
+
+        *{box-sizing:border-box}
+        body{
+          margin:0;
+          font-family:'Inter',sans-serif;
+          background:var(--bg);
+          color:var(--text);
+          display:flex;
+          height:100vh;
+        }
+
+        /* ================= SIDEBAR ================= */
+        .sidebar{
+          width:250px;
+          background:var(--card);
+          backdrop-filter:blur(12px);
+          border-right:1px solid var(--border);
+          transition:.3s;
+        }
+        .sidebar.collapsed{width:80px}
+        .sidebar h3{padding:1.2rem;font-weight:700}
+        .nav-link{
+          display:flex;
+          align-items:center;
+          gap:.8rem;
+          padding:.9rem 1.2rem;
+          margin:.25rem .7rem;
+          border-radius:10px;
+          text-decoration:none;
+          color:var(--text);
+          font-weight:500;
+        }
+        .nav-link:hover{background:var(--accent-soft)}
+        .nav-link.active{background:var(--accent);color:#fff}
+        .sidebar.collapsed .text{display:none}
+
+        /* ================= MAIN ================= */
+        .main{flex:1;display:flex;flex-direction:column}
+
+        /* ================= TOPBAR ================= */
+        .topbar{
+          height:60px;
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          padding:0 1.5rem;
+          background:var(--card);
+          border-bottom:1px solid var(--border);
+        }
+        .icon-btn{
+          background:none;
+          border:none;
+          font-size:1.1rem;
+          margin-left:.6rem;
+          cursor:pointer;
+          color:var(--text);
+        }
+
+        /* ================= CONTENT ================= */
+        .content{
+          padding:1.8rem;
+          overflow-y:auto;
+        }
+
+        /* ================= FILTER ================= */
+        .filter{
+          display:flex;
+          gap:1rem;
+          margin-bottom:1.2rem;
+        }
+        input{
+          padding:.6rem .8rem;
+          border-radius:8px;
+          border:1px solid #ccc;
+          width:200px;
+        }
+        button{
+          padding:.6rem 1.2rem;
+          border:none;
+          border-radius:8px;
+          background:var(--accent);
+          color:#fff;
+          font-weight:600;
+          cursor:pointer;
+        }
+
+        /* ================= TABLE ================= */
+        table{
+          width:100%;
+          border-collapse:collapse;
+          background:#fff;
+          border-radius:12px;
+          overflow:hidden;
+        }
+        th,td{
+          padding:12px;
+          border-bottom:1px solid #eee;
+          text-align:left;
+        }
+        th{
+          background:#f1f2ff;
+          font-weight:600;
+        }
+        .stock-in{color:green;font-weight:600}
+        .stock-out{color:red;font-weight:600}
+    </style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <h3><span class="text">Inventra</span></h3>
+
+    <a class="nav-link" href="dashboard.html"><i class="fa-solid fa-chart-line"></i><span class="text">Dashboard</span></a>
+    <a class="nav-link" href="products.html"><i class="fa-solid fa-box"></i><span class="text">Products</span></a>
+    <a class="nav-link" href="low-stock.html"><i class="fa-solid fa-triangle-exclamation"></i><span class="text">Low Stock</span></a>
+    <a class="nav-link active" href="transactions.html"><i class="fa-solid fa-arrow-right-arrow-left"></i><span class="text">Transactions</span></a>
+    <a class="nav-link" href="reports.html"><i class="fa-solid fa-chart-pie"></i><span class="text">Reports</span></a>
+    <a class="nav-link" href="categories.html"><i class="fa-solid fa-layer-group"></i>Categories</a>
+    <a class="nav-link" href="suppliers.html"><i class="fa-solid fa-truck"></i>Suppliers</a>
+    <a class="nav-link admin-only" href="register.html"><i class="fa-solid fa-user-plus"></i><span class="text">Register User</span></a>
+    <a class="nav-link" href="login.html" style="color:#ff4f4f"><i class="fa-solid fa-right-from-bracket"></i><span class="text">Logout</span></a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <h4>Stock Transactions</h4>
+        <div>
+            <span id="userRole"></span>
+            <button class="icon-btn" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+            <button class="icon-btn" id="collapseBtn"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <div class="filter">
+            <input type="number" id="productId" placeholder="Enter Product ID">
+            <button onclick="loadTransactions()">Load Transactions</button>
+
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Quantity</th>
+                <th>Batch</th>
+                <th>Performed By</th>
+            </tr>
+            </thead>
+            <tbody id="transactionBody"></tbody>
+        </table>
+
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem("token");
+    if (!token) location.href = "login.html";
+
+    const role = localStorage.getItem("role") || "USER";
+    document.getElementById("userRole").innerText = role;
+    if (role !== "ADMIN") {
+      document.querySelectorAll(".admin-only").forEach(e => e.style.display = "none");
+    }
+
+    collapseBtn.onclick = () => sidebar.classList.toggle("collapsed");
+    themeToggle.onclick = () => document.documentElement.classList.toggle("dark");
+
+    // 🔥 LOAD ALL TRANSACTIONS ON PAGE LOAD
+    document.addEventListener("DOMContentLoaded", () => {
+      loadTransactions();
+    });
+
+    function loadTransactions() {
+      const productId = document.getElementById("productId").value.trim();
+
+      // decide endpoint
+      const url = productId
+        ? `http://localhost:8080/transactions/product/${productId}`
+        : `http://localhost:8080/transactions`;
+
+      fetch(url, {
+        headers: { Authorization: "Bearer " + token }
+      })
+      .then(r => {
+        if (!r.ok) throw new Error("Failed to load transactions");
+        return r.json();
+      })
+      .then(data => {
+        const tbody = document.getElementById("transactionBody");
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="5" style="text-align:center;opacity:.7;">
+                No transactions found
+              </td>
+            </tr>`;
+          return;
+        }
+
+        data.forEach(t => {
+        const isStockOut = t.transactionType === "STOCK_OUT";
+          tbody.innerHTML += `
+            <tr>
+              <td>${t.performedAt.replace("T"," ")}</td>
+              <td class="${t.transactionType === 'STOCK_IN' ? 'stock-in' : 'stock-out'}">
+                ${t.transactionType}
+              </td>
+              <td>${t.quantity}</td>
+              <td>${t.batchNumber || '-'}</td>
+              <td>${t.performedBy}</td>
+            </tr>`;
+        });
+      })
+      .catch(err => {
+        alert(err.message);
+        console.error(err);
+      });
+    }
+    function viewBatchUsage(transactionId) {
+  fetch(`http://localhost:8080/transactions/${transactionId}/batches`, {
+    headers: {
+      Authorization: "Bearer " + token
+    }
+  })
+  .then(r => r.json())
+  .then(data => {
+    const tbody = document.getElementById("batchUsageBody");
+    tbody.innerHTML = "";
+
+    if (data.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="2" style="text-align:center;">No batch data</td>
+        </tr>
+      `;
+    } else {
+      data.forEach(b => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${b.batch.batchNumber}</td>
+            <td>${b.quantityUsed}</td>
+          </tr>
+        `;
+      });
+    }
+
+    document.getElementById("batchModal").style.display = "flex";
+  });
+}
+
+function closeBatchModal() {
+  document.getElementById("batchModal").style.display = "none";
+}
+
+</script>
+
+<!-- BATCH USAGE MODAL -->
+<div id="batchModal" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.4);
+  align-items:center;
+  justify-content:center;
+">
+
+    <div style="
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    width:420px;
+  ">
+        <h3>Batch Usage (FIFO)</h3>
+
+        <table style="width:100%; margin-top:10px;">
+            <thead>
+            <tr>
+                <th>Batch Number</th>
+                <th>Qty Used</th>
+            </tr>
+            </thead>
+            <tbody id="batchUsageBody"></tbody>
+        </table>
+
+        <button style="margin-top:15px;" onclick="closeBatchModal()">Close</button>
+    </div>
+</div>
+
+</body>
+</html>

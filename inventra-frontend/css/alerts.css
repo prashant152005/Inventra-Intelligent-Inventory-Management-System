@@ -1,0 +1,14 @@
+.alert-low {
+    color: orange;
+    font-weight: 600;
+}
+
+.alert-combined {
+    color: red;
+    font-weight: 700;
+}
+
+.alert-expired {
+    color: darkred;
+    font-weight: 700;
+}

@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reports & Analytics | Inventra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- FONTS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+    <!-- CHART JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root{
+            --bg:#f4f5ff;
+            --card:#ffffff40;
+            --card-border:#ffffff70;
+            --text:#111;
+            --accent:#6c63ff;
+            --accent-soft:#e9e7ff;
+            --success:#10b981;
+            --warning:#f59e0b;
+            --danger:#ef4444;
+            --muted:#6b7280;
+        }
+        .dark{
+            --bg:#111319;
+            --card:#1e202855;
+            --card-border:#ffffff15;
+            --text:#f1f1f1;
+            --accent:#7b6dff;
+            --accent-soft:#1c1e29;
+        }
+
+        body{
+            margin:0;
+            font-family:'Inter',sans-serif;
+            background:var(--bg);
+            color:var(--text);
+            display:flex;
+            height:100vh;
+            overflow:hidden;
+            transition:.3s;
+        }
+
+        /* SIDEBAR (FROM DASHBOARD) */
+        .sidebar{
+            width:250px;
+            background:var(--card);
+            backdrop-filter:blur(10px);
+            border-right:1px solid var(--card-border);
+            height:100vh;
+            transition:width .3s;
+            overflow:hidden;
+        }
+        .sidebar.collapsed{ width:80px; }
+        .sidebar h3{
+            font-size:1.2rem;
+            font-weight:700;
+            padding:1.2rem;
+        }
+        .nav-link{
+            display:flex;
+            align-items:center;
+            gap:.9rem;
+            padding:.9rem 1.2rem;
+            text-decoration:none;
+            color:var(--text);
+            font-weight:500;
+            border-radius:8px;
+            margin:.2rem .7rem;
+            transition:.2s;
+        }
+        .nav-link:hover{ background:var(--accent-soft); }
+        .nav-link.active{ background:var(--accent); color:white; }
+        .sidebar.collapsed .text{ display:none; }
+
+        /* MAIN */
+        .main{
+            flex-grow:1;
+            display:flex;
+            flex-direction:column;
+            height:100vh;
+        }
+
+        /* TOPBAR (FROM DASHBOARD) */
+        .topbar{
+            height:60px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            background:var(--card);
+            backdrop-filter:blur(10px);
+            border-bottom:1px solid var(--card-border);
+            padding:0 1.5rem;
+        }
+        .icon-btn{
+            background:none;
+            border:none;
+            color:var(--text);
+            font-size:1.1rem;
+            margin-left:.7rem;
+            cursor:pointer;
+        }
+
+        /* CONTENT BODY */
+        .content{
+            padding:1.8rem;
+            overflow-y:auto;
+        }
+
+        /* SECTION HEADERS */
+        .section-title{
+            font-size:1.3rem;
+            font-weight:700;
+            margin-bottom:1rem;
+            color:var(--accent);
+        }
+
+        /* FILTER CARD */
+        .filter-card{
+            background:var(--card);
+            border:1px solid var(--card-border);
+            border-radius:14px;
+            padding:1rem 1.2rem;
+            backdrop-filter:blur(12px);
+            box-shadow:0 6px 14px rgba(0,0,0,0.06);
+            margin-bottom:1.2rem;
+        }
+
+        .filter-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+            gap:1.2rem;
+        }
+
+        input{
+            width:100%;
+            padding:.6rem;
+            border-radius:8px;
+            border:1px solid var(--card-border);
+            background:var(--bg);
+            color:var(--text);
+            font-size:.9rem;
+        }
+
+        .btn{
+            padding:.55rem 1rem;
+            border-radius:8px;
+            font-weight:600;
+            cursor:pointer;
+            border:none;
+            transition:.2s;
+        }
+        .btn-primary{ background:var(--accent); color:white; }
+        .btn-primary:hover{ filter:brightness(0.9); }
+        .btn-success{ background:var(--success); color:white; }
+
+        /* CARDS */
+        .data-card{
+            background:var(--card);
+            border:1px solid var(--card-border);
+            border-radius:14px;
+            padding:1rem 1.2rem;
+            backdrop-filter:blur(12px);
+            box-shadow:0 8px 18px rgba(0,0,0,0.07);
+            margin-bottom:1.2rem;
+        }
+
+        .metrics-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+            gap:1.2rem;
+        }
+
+        .metric-box{
+            padding:1rem;
+            border-radius:12px;
+            background:var(--accent-soft);
+        }
+
+        .metric-box p{
+            margin:0;
+            font-weight:600;
+        }
+
+        /* TABLE */
+        table{
+            width:100%;
+            border-collapse:separate;
+            border-spacing:0 8px;
+        }
+        th{
+            text-align:left;
+            padding:.7rem;
+            font-size:.85rem;
+            color:var(--muted);
+        }
+        td{
+            padding:.9rem;
+            background:white;
+            border-radius:10px;
+            border-bottom:1px solid #eee;
+        }
+        .low{ color:var(--danger); font-weight:600; }
+
+        /* CHART */
+        #salesChart{
+            width:100%;
+            margin-top:1.2rem;
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:600px){
+            .filter-grid{ grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <h3><span class="text">Inventra</span></h3>
+    <a class="nav-link" href="dashboard.html"><i class="fa-solid fa-chart-line"></i><span class="text">Dashboard</span></a>
+    <a class="nav-link" href="products.html"><i class="fa-solid fa-box"></i><span class="text">Products</span></a>
+    <a class="nav-link" href="low-stock.html"><i class="fa-solid fa-triangle-exclamation"></i><span class="text">Low Stock</span></a>
+    <a class="nav-link" href="transactions.html">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i><span class="text">Transactions</span>
+    </a>
+    <a class="nav-link active" href="reports.html"><i class="fa-solid fa-chart-pie"></i><span class="text">Reports</span></a>
+    <a class="nav-link" href="categories.html"><i class="fa-solid fa-layer-group"></i>Categories</a>
+    <a class="nav-link" href="suppliers.html"><i class="fa-solid fa-truck"></i>Suppliers</a>
+    <a class="nav-link admin-only" href="register.html">
+        <i class="fa-solid fa-user-plus"></i><span class="text">Register User</span>
+    </a>
+    <a class="nav-link" style="color:#ff4f4f;" href="login.html"><i class="fa-solid fa-right-from-bracket"></i><span class="text">Logout</span></a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+    <div class="topbar">
+        <h4 style="font-weight:600;">Reports & Analytics</h4>
+        <div>
+            <span id="userRole" style="font-weight:600;margin-right:.6rem;"></span>
+            <button class="icon-btn" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+            <button class="icon-btn" id="collapseBtn"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- SALES REPORT -->
+        <div class="section-title">Sales Report</div>
+
+        <div class="filter-card">
+            <div class="filter-grid">
+                <div>
+                    <label>From</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div>
+                    <label>To</label>
+                    <input type="date" id="endDate">
+                </div>
+                <div style="display:flex;align-items:flex-end;gap:.6rem;">
+                    <button class="btn btn-primary" onclick="loadSalesReport()">Generate</button>
+                    <button class="btn btn-success" onclick="exportSalesCsv()">CSV</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="salesReportCard" style="display:none;">
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <p>Period</p><span id="period"></span>
+                </div>
+                <div class="metric-box">
+                    <p>Total Revenue</p><span id="totalRevenue" style="color:var(--success);"></span>
+                </div>
+                <div class="metric-box">
+                    <p>Total Transactions</p><span id="totalTransactions"></span>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <h4 style="margin:0 0 .6rem;">Top 5 Products</h4>
+                <div id="topProducts"></div>
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- INVENTORY REPORT -->
+        <div class="section-title">Inventory Report</div>
+
+        <div class="data-card">
+            <div id="inventorySummary" class="metrics-grid"></div>
+            <h4 style="margin:.8rem 0;">Low Stock Products</h4>
+            <table>
+                <thead>
+                <tr>
+                    <th>Name</th><th>SKU</th><th>Qty</th><th>Reorder</th><th>Value</th>
+                </tr>
+                </thead>
+                <tbody id="lowStockTableBody"></tbody>
+            </table>
+            <button class="btn btn-success" style="margin-top:1rem;" onclick="exportInventoryCsv()">Export Inventory CSV</button>
+        </div>
+
+    </div>
+</div>
+
+<!--<script>-->
+<!--    /* === SAME JS AS YOUR ORIGINAL (NOT REMOVED!) === */-->
+<!--    /* AUTH */-->
+<!--    const token=localStorage.getItem("token");-->
+<!--    if(!token) location.href="login.html";-->
+
+<!--    const role=localStorage.getItem("role")||"USER";-->
+<!--    document.getElementById("userRole").innerText=role;-->
+<!--    if(role!=="ADMIN") document.querySelectorAll(".admin-only").forEach(e=>e.style.display="none");-->
+
+<!--    /* SIDEBAR */-->
+<!--    document.getElementById("collapseBtn").onclick=()=>document.getElementById("sidebar").classList.toggle("collapsed");-->
+
+<!--    /* THEME */-->
+<!--    document.getElementById("themeToggle").onclick=()=>document.documentElement.classList.toggle("dark");-->
+
+<!--    /* SALES CHART INSTANCE */-->
+<!--    let salesChartInstance=null;-->
+
+<!--    /* LOAD SALES REPORT */-->
+<!--    async function loadSalesReport(){-->
+<!--        const start=startDate.value, end=endDate.value;-->
+<!--        if(!start||!end) return alert("Select dates");-->
+<!--        const res=await fetch(`http://localhost:8080/reports/sales?startDate=${start}&endDate=${end}`,{headers:{Authorization:"Bearer "+token}});-->
+<!--        const data=await res.json();-->
+<!--        salesReportCard.style.display="block";-->
+<!--        period.textContent=`${start} ➜ ${end}`;-->
+<!--        totalRevenue.textContent=`₹${data.totalRevenue.toFixed(2)}`;-->
+<!--        totalTransactions.textContent=data.totalTransactions;-->
+<!--        let list="<ul>";-->
+<!--        data.topProducts.forEach(p=>list+=`<li>${p.productName} (${p.sku}) — ${p.quantitySold} sold</li>`);-->
+<!--        list+="</ul>";-->
+<!--        topProducts.innerHTML=list;-->
+<!--        const ctx=salesChart.getContext("2d");-->
+<!--        if(salesChartInstance) salesChartInstance.destroy();-->
+<!--        salesChartInstance=new Chart(ctx,{-->
+<!--            type:"line",-->
+<!--            data:{-->
+<!--                labels:data.dailySales.map(d=>d.date),-->
+<!--                datasets:[{label:"Revenue",data:data.dailySales.map(d=>d.revenue),borderColor:"#6c63ff",backgroundColor:"rgba(108,99,255,0.25)",tension:0.3,fill:true}]-->
+<!--            }-->
+<!--        });-->
+<!--    }-->
+
+<!--    getItem("token");-->
+<!--if (!token) location.href = "login.html";-->
+
+<!--const role = localStorage.getItem("role") || "USER";-->
+<!--document.getElementById("userRole").innerText = role;-->
+<!--if (role !== "ADMIN") {-->
+<!--    document.querySelectorAll(".admin-only").forEach(e => e.style.display = "none");-->
+<!--}-->
+
+<!--/* SIDEBAR */-->
+<!--document.getElementById("collapseBtn").onclick =-->
+<!--    () => document.getElementById("sidebar").classList.toggle("collapsed");-->
+
+<!--/* THEME */-->
+<!--document.getElementById("themeToggle").onclick =-->
+<!--    () => document.documentElement.classList.toggle("dark");-->
+
+<!--/* SALES CHART */-->
+<!--let salesChartInstance = null;-->
+
+<!--/* LOAD SALES REPORT */-->
+<!--async function loadSalesReport() {-->
+<!--    const start = startDate.value;-->
+<!--    const end = endDate.value;-->
+
+<!--    if (!start || !end) {-->
+<!--        alert("Select dates");-->
+<!--        return;-->
+<!--    }-->
+
+<!--    const res = await fetch(-->
+<!--        `http://localhost:8080/reports/sales?startDate=${start}&endDate=${end}`,-->
+<!--        { headers: { Authorization: "Bearer " + token } }-->
+<!--    );-->
+
+<!--    const data = await res.json();-->
+
+<!--    salesReportCard.style.display = "block";-->
+<!--    period.textContent = `${start} ➜ ${end}`;-->
+<!--    totalRevenue.textContent = `₹${data.totalRevenue.toFixed(2)}`;-->
+<!--    totalTransactions.textContent = data.totalTransactions;-->
+
+<!--    let list = "<ul>";-->
+<!--    data.topProducts.forEach(-->
+<!--        p => list += `<li>${p.productName} (${p.sku}) — ${p.quantitySold} sold</li>`-->
+<!--    );-->
+<!--    list += "</ul>";-->
+<!--    topProducts.innerHTML = list;-->
+
+<!--    const ctx = salesChart.getContext("2d");-->
+<!--    if (salesChartInstance) salesChartInstance.destroy();-->
+
+<!--    salesChartInstance = new Chart(ctx, {-->
+<!--        type: "line",-->
+<!--        data: {-->
+<!--            labels: data.dailySales.map(d => d.date),-->
+<!--            datasets: [{-->
+<!--                label: "Revenue",-->
+<!--                data: data.dailySales.map(d => d.revenue),-->
+<!--                borderColor: "#6c63ff",-->
+<!--                backgroundColor: "rgba(108,99,255,0.25)",-->
+<!--                tension: 0.3,-->
+<!--                fill: true-->
+<!--            }]-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--/* EXPORT SALES CSV ✅ */-->
+<!--async function exportSalesCsv() {-->
+<!--    const start = startDate.value;-->
+<!--    const end = endDate.value;-->
+
+<!--    if (!start || !end) {-->
+<!--        alert("Please select From and To dates");-->
+<!--        return;-->
+<!--    }-->
+
+<!--    try {-->
+<!--        const res = await fetch(-->
+<!--            `http://localhost:8080/reports/sales/csv?startDate=${start}&endDate=${end}`,-->
+<!--            { headers: { Authorization: "Bearer " + token } }-->
+<!--        );-->
+
+<!--        if (!res.ok) throw new Error("CSV failed");-->
+
+<!--        const blob = await res.blob();-->
+<!--        const url = URL.createObjectURL(blob);-->
+
+<!--        const a = document.createElement("a");-->
+<!--        a.href = url;-->
+<!--        a.download = `sales-report-${start}-to-${end}.csv`;-->
+<!--        document.body.appendChild(a);-->
+<!--        a.click();-->
+<!--        document.body.removeChild(a);-->
+
+<!--        URL.revokeObjectURL(url);-->
+<!--    } catch (e) {-->
+<!--        console.error(e);-->
+<!--        alert("Error downloading sales CSV");-->
+<!--    }-->
+<!--}-->
+
+
+<!-- /* EXPORT INVENTORY CSV */-->
+<!--    async function exportInventoryCsv() {-->
+<!--        try {-->
+<!--            const res = await fetch(-->
+<!--                "http://localhost:8080/reports/inventory/csv",-->
+<!--                { headers: { Authorization: "Bearer " + token } }-->
+<!--            );-->
+
+<!--            if (!res.ok) {-->
+<!--                throw new Error("Failed to export inventory CSV");-->
+<!--            }-->
+
+<!--            const blob = await res.blob();-->
+<!--            const url = URL.createObjectURL(blob);-->
+
+<!--            const a = document.createElement("a");-->
+<!--            a.href = url;-->
+<!--            a.download = "inventory-report.csv";-->
+<!--            document.body.appendChild(a);-->
+<!--            a.click();-->
+<!--            document.body.removeChild(a);-->
+
+<!--            URL.revokeObjectURL(url);-->
+<!--        } catch (err) {-->
+<!--            console.error(err);-->
+<!--            alert("Error downloading inventory CSV");-->
+<!--        }-->
+<!--    }-->
+
+<!--    /* LOAD INVENTORY */-->
+<!--    async function loadInventory(){-->
+<!--        const res=await fetch("http://localhost:8080/reports/inventory",{headers:{Authorization:"Bearer "+token}});-->
+<!--        const data=await res.json();-->
+<!--        inventorySummary.innerHTML=`-->
+<!--            <div class="metric-box"><p>Total Products</p>${data.totalProducts}</div>-->
+<!--            <div class="metric-box"><p>Stock Value</p>₹${data.totalStockValue.toFixed(2)}</div>-->
+<!--            <div class="metric-box"><p>Low Stock</p><span class="low">${data.lowStockCount}</span></div>-->
+<!--            <div class="metric-box"><p>Out of Stock</p><span class="low">${data.outOfStockCount}</span></div>-->
+<!--        `;-->
+<!--        const tbody=lowStockTableBody;-->
+<!--        tbody.innerHTML="";-->
+<!--        data.lowStockProducts.forEach(p=>{-->
+<!--            const tr=document.createElement("tr");-->
+<!--            tr.innerHTML=`<td>${p.name}</td><td>${p.sku}</td><td class="low">${p.quantity}</td><td>${p.reorderLevel}</td><td>₹${p.value.toFixed(2)}</td>`;-->
+<!--            tbody.appendChild(tr);-->
+<!--        });-->
+<!--    }-->
+<!--    loadInventory();-->
+<!--</script>-->
+
+
+
+
+<script>
+    /* AUTH */
+    const token = localStorage.getItem("token");
+    if (!token) location.href = "login.html";
+
+    const role = localStorage.getItem("role") || "USER";
+    document.getElementById("userRole").innerText = role;
+    if (role !== "ADMIN") {
+        document.querySelectorAll(".admin-only").forEach(e => e.style.display = "none");
+    }
+
+    /* SIDEBAR */
+    document.getElementById("collapseBtn").onclick =
+        () => document.getElementById("sidebar").classList.toggle("collapsed");
+
+    /* THEME */
+    document.getElementById("themeToggle").onclick =
+        () => document.documentElement.classList.toggle("dark");
+
+    /* SALES CHART */
+    let salesChartInstance = null;
+
+    /* LOAD SALES REPORT */
+    async function loadSalesReport() {
+        const start = startDate.value;
+        const end = endDate.value;
+
+        if (!start || !end) {
+            alert("Select dates");
+            return;
+        }
+
+        const res = await fetch(
+            `http://localhost:8080/reports/sales?startDate=${start}&endDate=${end}`,
+            { headers: { Authorization: "Bearer " + token } }
+        );
+
+        const data = await res.json();
+
+        salesReportCard.style.display = "block";
+        period.textContent = `${start} ➜ ${end}`;
+        totalRevenue.textContent = `₹${data.totalRevenue.toFixed(2)}`;
+        totalTransactions.textContent = data.totalTransactions;
+
+        let list = "<ul>";
+        data.topProducts.forEach(
+            p => list += `<li>${p.productName} (${p.sku}) — ${p.quantitySold} sold</li>`
+        );
+        list += "</ul>";
+        topProducts.innerHTML = list;
+
+        const ctx = salesChart.getContext("2d");
+        if (salesChartInstance) salesChartInstance.destroy();
+
+        salesChartInstance = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: data.dailySales.map(d => d.date),
+                datasets: [{
+                    label: "Revenue",
+                    data: data.dailySales.map(d => d.revenue),
+                    borderColor: "#6c63ff",
+                    backgroundColor: "rgba(108,99,255,0.25)",
+                    tension: 0.3,
+                    fill: true
+                }]
+            }
+        });
+    }
+
+    /* EXPORT SALES CSV ✅ */
+    async function exportSalesCsv() {
+        const start = startDate.value;
+        const end = endDate.value;
+
+        if (!start || !end) {
+            alert("Please select From and To dates");
+            return;
+        }
+
+        try {
+            const res = await fetch(
+                `http://localhost:8080/reports/sales/csv?startDate=${start}&endDate=${end}`,
+                { headers: { Authorization: "Bearer " + token } }
+            );
+
+            if (!res.ok) throw new Error("CSV failed");
+
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `sales-report-${start}-to-${end}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            console.error(e);
+            alert("Error downloading sales CSV");
+        }
+    }
+
+    /* EXPORT INVENTORY CSV ✅ */
+    async function exportInventoryCsv() {
+        try {
+            const res = await fetch(
+                "http://localhost:8080/reports/inventory/csv",
+                { headers: { Authorization: "Bearer " + token } }
+            );
+
+            if (!res.ok) throw new Error("Inventory CSV failed");
+
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "inventory-report.csv";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            console.error(e);
+            alert("Error downloading inventory CSV");
+        }
+    }
+
+    /* LOAD INVENTORY */
+    async function loadInventory() {
+        const res = await fetch(
+            "http://localhost:8080/reports/inventory",
+            { headers: { Authorization: "Bearer " + token } }
+        );
+
+        const data = await res.json();
+
+        inventorySummary.innerHTML = `
+            <div class="metric-box"><p>Total Products</p>${data.totalProducts}</div>
+            <div class="metric-box"><p>Stock Value</p>₹${data.totalStockValue.toFixed(2)}</div>
+            <div class="metric-box"><p>Low Stock</p><span class="low">${data.lowStockCount}</span></div>
+            <div class="metric-box"><p>Out of Stock</p><span class="low">${data.outOfStockCount}</span></div>
+        `;
+
+        lowStockTableBody.innerHTML = "";
+        data.lowStockProducts.forEach(p => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${p.name}</td>
+                <td>${p.sku}</td>
+                <td class="low">${p.quantity}</td>
+                <td>${p.reorderLevel}</td>
+                <td>₹${p.value.toFixed(2)}</td>
+            `;
+            lowStockTableBody.appendChild(tr);
+        });
+    }
+
+    loadInventory();
+</script>
+
+</body>
+</html>

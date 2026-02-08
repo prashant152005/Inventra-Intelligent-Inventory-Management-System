@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Suppliers | Inventra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+    <style>
+        /* ================= THEME (same as Transactions) ================= */
+        :root{
+          --bg:#f4f5ff;
+          --card:rgba(255,255,255,0.55);
+          --border:rgba(255,255,255,0.7);
+          --text:#111;
+          --accent:#6c63ff;
+          --accent-soft:#e9e7ff;
+          --danger:#ef4444;
+        }
+        .dark{
+          --bg:#111319;
+          --card:rgba(30,32,40,0.6);
+          --border:rgba(255,255,255,0.08);
+          --text:#f1f1f1;
+          --accent:#7b6dff;
+          --accent-soft:#1c1e29;
+        }
+
+        *{box-sizing:border-box}
+        body{
+          margin:0;
+          font-family:'Inter',sans-serif;
+          background:var(--bg);
+          color:var(--text);
+          display:flex;
+          height:100vh;
+        }
+
+        /* ================= SIDEBAR ================= */
+        .sidebar{
+          width:250px;
+          background:var(--card);
+          backdrop-filter:blur(12px);
+          border-right:1px solid var(--border);
+          transition:.3s;
+        }
+        .sidebar.collapsed{width:80px}
+        .sidebar h3{padding:1.2rem;font-weight:700}
+        .nav-link{
+          display:flex;
+          align-items:center;
+          gap:.8rem;
+          padding:.9rem 1.2rem;
+          margin:.25rem .7rem;
+          border-radius:10px;
+          text-decoration:none;
+          color:var(--text);
+          font-weight:500;
+        }
+        .nav-link:hover{background:var(--accent-soft)}
+        .nav-link.active{background:var(--accent);color:#fff}
+        .sidebar.collapsed .text{display:none}
+
+        /* ================= MAIN ================= */
+        .main{flex:1;display:flex;flex-direction:column}
+
+        /* ================= TOPBAR ================= */
+        .topbar{
+          height:60px;
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          padding:0 1.5rem;
+          background:var(--card);
+          border-bottom:1px solid var(--border);
+        }
+        .icon-btn{
+          background:none;
+          border:none;
+          font-size:1.1rem;
+          margin-left:.6rem;
+          cursor:pointer;
+          color:var(--text);
+        }
+
+        /* ================= CONTENT ================= */
+        .content{
+          padding:1.8rem;
+          overflow-y:auto;
+        }
+
+        .header-bar{
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          margin-bottom:1.2rem;
+        }
+        .header-bar h2{
+          margin:0;
+          font-size:1.6rem;
+          color:var(--accent);
+        }
+
+        .btn{
+          padding:.6rem 1.2rem;
+          border:none;
+          border-radius:8px;
+          font-weight:600;
+          cursor:pointer;
+        }
+        .btn-primary{background:var(--accent);color:#fff}
+        .btn-danger{background:var(--danger);color:#fff}
+        .btn-outline{
+          background:none;
+          border:1.5px solid var(--accent);
+          color:var(--accent);
+        }
+
+        /* ================= TABLE ================= */
+        table{
+          width:100%;
+          border-collapse:collapse;
+          background:#fff;
+          border-radius:12px;
+          overflow:hidden;
+          box-shadow:0 10px 24px rgba(0,0,0,.08);
+        }
+        th,td{
+          padding:1rem;
+          border-bottom:1px solid #eee;
+          text-align:left;
+        }
+        th{
+          background:#f1f2ff;
+          font-size:.85rem;
+          text-transform:uppercase;
+          letter-spacing:.04em;
+          opacity:.7;
+        }
+        tbody tr:last-child td{border-bottom:none}
+        tbody tr:hover{background:#fafaff}
+        .action{text-align:center}
+
+        .empty{
+          padding:3rem;
+          text-align:center;
+          opacity:.6;
+        }
+
+        /* ================= MODAL ================= */
+        .modal{
+          display:none;
+          position:fixed;
+          inset:0;
+          background:rgba(0,0,0,.45);
+          align-items:center;
+          justify-content:center;
+          z-index:1000;
+        }
+        .modal-card{
+          background:#fff;
+          width:420px;
+          border-radius:14px;
+          box-shadow:0 20px 40px rgba(0,0,0,.25);
+          animation:scale .25s ease;
+        }
+        @keyframes scale{
+          from{transform:scale(.9);opacity:0}
+          to{transform:scale(1);opacity:1}
+        }
+        .modal-header,.modal-footer{
+          padding:1.2rem 1.5rem;
+          border-bottom:1px solid #eee;
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+        }
+        .modal-footer{border-top:1px solid #eee;border-bottom:none}
+        .modal-body{padding:1.5rem}
+        label{font-weight:600;display:block;margin-bottom:.3rem}
+        input,textarea{
+          width:100%;
+          padding:.7rem;
+          border-radius:8px;
+          border:1px solid #ccc;
+          margin-bottom:1rem;
+          font-family:inherit;
+        }
+        textarea{resize:vertical}
+        .close{
+          background:none;
+          border:none;
+          font-size:1.6rem;
+          cursor:pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <h3><span class="text">Inventra</span></h3>
+
+    <a class="nav-link" href="dashboard.html"><i class="fa-solid fa-chart-line"></i><span class="text">Dashboard</span></a>
+    <a class="nav-link" href="products.html"><i class="fa-solid fa-box"></i><span class="text">Products</span></a>
+    <a class="nav-link" href="low-stock.html"><i class="fa-solid fa-triangle-exclamation"></i><span class="text">Low Stock</span></a>
+    <a class="nav-link" href="transactions.html"><i class="fa-solid fa-arrow-right-arrow-left"></i><span class="text">Transactions</span></a>
+    <a class="nav-link" href="reports.html"><i class="fa-solid fa-chart-pie"></i><span class="text">Reports</span></a>
+    <a class="nav-link" href="categories.html"><i class="fa-solid fa-layer-group"></i><span class="text">Categories</span></a>
+
+    <a class="nav-link active" href="suppliers.html">
+        <i class="fa-solid fa-truck"></i><span class="text">Suppliers</span>
+    </a>
+
+    <a class="nav-link admin-only" href="register.html">
+        <i class="fa-solid fa-user-plus"></i><span class="text">Register User</span>
+    </a>
+
+    <a class="nav-link" href="login.html" style="color:#ff4f4f">
+        <i class="fa-solid fa-right-from-bracket"></i><span class="text">Logout</span>
+    </a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <h4>Supplier Management</h4>
+        <div>
+            <span id="userRole"></span>
+            <button class="icon-btn" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+            <button class="icon-btn" id="collapseBtn"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+        <div class="header-bar">
+            <h2>Suppliers</h2>
+            <button class="btn btn-primary admin-only" onclick="openModal()">
+                <i class="fa-solid fa-plus"></i> Add Supplier
+            </button>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th class="action">Action</th>
+            </tr>
+            </thead>
+            <tbody id="supplierTable"></tbody>
+        </table>
+
+        <div class="empty" id="emptyState" style="display:none;">
+            No suppliers found
+        </div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="supplierModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Add Supplier</h3>
+            <button class="close" onclick="closeModal()">×</button>
+        </div>
+
+        <div class="modal-body">
+            <label>Supplier Name *</label>
+            <input id="supplierName">
+
+            <label>Email</label>
+            <input id="supplierEmail">
+
+            <label>Phone</label>
+            <input id="supplierPhone">
+
+            <label>Address</label>
+            <textarea id="supplierAddress"></textarea>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveSupplier()">Save</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem("token");
+    if (!token) location.href = "login.html";
+
+    const role = localStorage.getItem("role") || "USER";
+    document.getElementById("userRole").innerText = role;
+
+    if (role !== "ADMIN") {
+      document.querySelectorAll(".admin-only")
+        .forEach(e => e.style.display = "none");
+    }
+
+    collapseBtn.onclick = () => sidebar.classList.toggle("collapsed");
+    themeToggle.onclick = () => document.documentElement.classList.toggle("dark");
+
+async function loadSuppliers(){
+  const res = await fetch("http://localhost:8080/api/suppliers",{
+    headers:{ Authorization:"Bearer "+token }
+  });
+  const data = await res.json();
+
+  const tbody = document.getElementById("supplierTable");
+  tbody.innerHTML = "";
+
+  document.getElementById("emptyState").style.display =
+    data.length === 0 ? "block" : "none";
+
+  data.forEach(s=>{
+    tbody.innerHTML += `
+      <tr>
+        <td><strong>${s.name}</strong></td>
+        <td>${s.email || "-"}</td>
+        <td>${s.phone || "-"}</td>
+        <td class="action">
+          <button class="btn btn-danger admin-only"
+                  onclick="deleteSupplier(${s.id})">
+            Delete
+          </button>
+        </td>
+      </tr>`;
+  });
+
+  // 🔒 Hide admin-only buttons after rendering
+  if (role !== "ADMIN") {
+    document.querySelectorAll(".admin-only")
+      .forEach(e => e.style.display = "none");
+  }
+}
+
+
+    function openModal(){ supplierModal.style.display="flex"; }
+    function closeModal(){ supplierModal.style.display="none"; }
+
+    async function saveSupplier(){
+      const name = supplierName.value.trim();
+      if(!name){ alert("Supplier name required"); return; }
+
+      await fetch("http://localhost:8080/api/suppliers",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          Authorization:"Bearer "+token
+        },
+        body:JSON.stringify({
+          name,
+          email:supplierEmail.value.trim(),
+          phone:supplierPhone.value.trim(),
+          address:supplierAddress.value.trim()
+        })
+      });
+
+      closeModal();
+      loadSuppliers();
+    }
+
+    async function deleteSupplier(id){
+      if(!confirm("Delete supplier?")) return;
+      await fetch(`http://localhost:8080/api/suppliers/${id}`,{
+        method:"DELETE",
+        headers:{ Authorization:"Bearer "+token }
+      });
+      loadSuppliers();
+    }
+
+    loadSuppliers();
+</script>
+
+</body>
+</html>

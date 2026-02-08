@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Low Stock | Inventra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+    <style>
+        :root {
+            --bg:#f4f5ff;
+            --card:rgba(255,255,255,0.45);
+            --card-border:rgba(255,255,255,0.7);
+            --text:#111;
+            --accent:#6c63ff;
+            --danger:#e03131;
+            --warning:#f08c00;
+            --muted:#6c757d;
+        }
+        .dark {
+            --bg:#111319;
+            --card:rgba(25,27,33,0.55);
+            --card-border:rgba(255,255,255,0.08);
+            --text:#f1f1f1;
+        }
+        body{
+            margin:0;
+            background:var(--bg);
+            color:var(--text);
+            font-family:'Inter',sans-serif;
+            display:flex;
+            transition:.3s;
+            overflow:hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar{
+            width:250px;
+            background:var(--card);
+            backdrop-filter:blur(10px);
+            border-right:1px solid var(--card-border);
+            height:100vh;
+            transition:.3s;
+            overflow:hidden;
+        }
+        .sidebar.collapsed{ width:80px; }
+
+        .sidebar-title{
+            padding:1.2rem;
+            font-size:1.2rem;
+            font-weight:700;
+        }
+        .nav-link{
+            display:flex;
+            align-items:center;
+            padding:.9rem 1.2rem;
+            gap:.9rem;
+            font-weight:500;
+            text-decoration:none;
+            color:var(--text);
+            border-radius:8px;
+            margin:.25rem .7rem;
+            transition:.2s;
+        }
+        .nav-link:hover{ background:rgba(108,99,255,0.10); }
+        .nav-link.active{
+            background:var(--accent);
+            color:white;
+        }
+        .sidebar.collapsed .text{ display:none; }
+
+        /* MAIN */
+        .main{
+            flex-grow:1;
+            display:flex;
+            flex-direction:column;
+            height:100vh;
+        }
+        .topbar{
+            height:60px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            background:var(--card);
+            backdrop-filter:blur(10px);
+            border-bottom:1px solid var(--card-border);
+            padding:0 1.5rem;
+        }
+        .icon-btn{
+            background:none;
+            border:none;
+            cursor:pointer;
+            font-size:1.1rem;
+            margin-left:.6rem;
+            color:var(--text);
+        }
+
+        /* CONTENT */
+        .content{
+            padding:1.5rem;
+            overflow-y:auto;
+        }
+        .grid{
+            display:grid;
+            gap:1.4rem;
+            justify-content:center;
+            grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+        }
+
+        /* CARD */
+        .lowcard{
+            max-width:360px;
+            background:var(--card);
+            border:1px solid var(--card-border);
+            border-radius:18px;
+            padding:1.1rem 1.2rem;
+            backdrop-filter:blur(12px);
+            box-shadow:0 8px 22px rgba(0,0,0,0.08);
+            transition:.25s ease;
+        }
+        .lowcard:hover{
+            transform:translateY(-4px);
+            box-shadow:0 12px 28px rgba(0,0,0,0.12);
+        }
+        .name{
+            font-size:1.05rem;
+            font-weight:600;
+        }
+        .sku{
+            font-size:.8rem;
+            font-family:monospace;
+            opacity:.7;
+            margin:.25rem 0 .7rem;
+        }
+        .qty{
+            font-size:2.1rem;
+            font-weight:700;
+            margin-bottom:.3rem;
+        }
+        .meta{
+            font-size:.85rem;
+            opacity:.75;
+        }
+        .row{
+            margin:.2rem 0;
+        }
+
+        /* BADGES */
+        .tag{
+            margin-top:.8rem;
+            padding:.35rem .6rem;
+            border-radius:6px;
+            display:inline-block;
+            font-size:.75rem;
+            font-weight:600;
+            border:1px solid transparent;
+        }
+        .tag.out{
+            border-color:var(--danger);
+            color:var(--danger);
+        }
+        .tag.critical{
+            border-color:var(--warning);
+            color:var(--warning);
+        }
+        .tag.low{
+            border-color:#4c6ef5;
+            color:#4c6ef5;
+        }
+
+        /* EMPTY */
+        .empty{
+            text-align:center;
+            opacity:.6;
+            margin-top:2rem;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <h3 class="sidebar-title"><span class="text">Inventra</span></h3>
+    <a class="nav-link" href="dashboard.html"><i class="fa-solid fa-chart-line"></i><span class="text">Dashboard</span></a>
+    <a class="nav-link" href="products.html"><i class="fa-solid fa-box"></i><span class="text">Products</span></a>
+    <a class="nav-link active" href="low-stock.html"><i class="fa-solid fa-triangle-exclamation"></i><span class="text">Low Stock</span></a>
+    <a class="nav-link" href="transactions.html"><i class="fa-solid fa-arrow-right-arrow-left"></i><span class="text">Transactions</span></a>
+    <a class="nav-link" href="reports.html"><i class="fa-solid fa-chart-pie"></i><span class="text">Reports</span></a>
+    <a class="nav-link" href="categories.html"><i class="fa-solid fa-layer-group"></i>Categories</a>
+    <a class="nav-link" href="suppliers.html"><i class="fa-solid fa-truck"></i>Suppliers</a>
+    <a class="nav-link admin-only" href="register.html"><i class="fa-solid fa-user-plus"></i><span class="text">Register User</span></a>
+    <a class="nav-link" href="login.html" style="color:#e03131;"><i class="fa-solid fa-right-from-bracket"></i><span class="text">Logout</span></a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+    <div class="topbar">
+        <h4 style="font-weight:600;">Low Stock</h4>
+        <div>
+            <span id="role" style="font-weight:600;margin-right:.6rem;"></span>
+            <button class="icon-btn" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+            <button class="icon-btn" id="collapseBtn"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div id="grid" class="grid"></div>
+        <p id="empty" class="empty"></p>
+    </div>
+</div>
+
+<script>
+    const token=localStorage.getItem("token");
+    const role=localStorage.getItem("role")||"USER";
+    if(!token) location.href="login.html";
+    document.getElementById("role").innerText=role.toUpperCase();
+    if(role!=="ADMIN") document.querySelectorAll(".admin-only").forEach(e=>e.style.display="none");
+
+    document.getElementById("collapseBtn").onclick=()=>{
+        document.getElementById("sidebar").classList.toggle("collapsed");
+    };
+    document.getElementById("themeToggle").onclick=()=>{
+        document.documentElement.classList.toggle("dark");
+    };
+
+    async function loadLow(){
+        const res=await fetch("http://localhost:8080/products/low-stock",{headers:{Authorization:"Bearer "+token}});
+        let data=await res.json();
+
+        // sorting: Out -> Critical -> Low
+        data.sort((a,b)=>{
+            const lvl=p=>{
+                if(p.quantity<=0) return 0;
+                if(p.quantity<=p.reorderLevel/2) return 1;
+                return 2;
+            };
+            return lvl(a)-lvl(b);
+        });
+
+        const grid=document.getElementById("grid");
+        const empty=document.getElementById("empty");
+        grid.innerHTML="";
+        if(!data.length){
+            empty.innerText="✔ All items are sufficiently stocked";
+            return;
+        }
+        empty.innerText="";
+
+        data.forEach(p=>{
+            const out=p.quantity<=0;
+            const critical=p.quantity>0 && p.quantity<=p.reorderLevel/2;
+
+            const card=document.createElement("div");
+            card.className="lowcard";
+
+            card.innerHTML=`
+                <div class="name">${p.name||"Unnamed Product"}</div>
+                <div class="sku">SKU: ${p.sku||"N/A"}</div>
+
+                <div class="qty" style="color:${out?'var(--danger)':critical?'var(--warning)':'var(--text)'}">
+                    ${p.quantity}
+                </div>
+
+                <div class="row"><strong>Reorder:</strong> ${p.reorderLevel}</div>
+                <div class="row"><strong>Price:</strong> ₹${(p.unitPrice||0).toFixed(2)}</div>
+
+                <div class="tag ${out?'out':critical?'critical':'low'}">
+                    ${out?'🔴 OUT OF STOCK':critical?'🟠 CRITICAL STOCK':'🟡 LOW STOCK'}
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+    loadLow();
+</script>
+</body>
+</html>
